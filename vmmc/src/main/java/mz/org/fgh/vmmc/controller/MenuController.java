@@ -15,7 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import mz.org.fgh.vmmc.model.Menu;
 import mz.org.fgh.vmmc.repository.MenuRepository;
-import mz.org.fgh.vmmc.service.MenuManagerService;
+import mz.org.fgh.vmmc.service.MenuService;
 
 @RestController
 public class MenuController {
@@ -24,7 +24,7 @@ public class MenuController {
 	MenuRepository menuRepo;
 
 	@Autowired
-	MenuManagerService service;
+	MenuService service;
 
 	@GetMapping(value = "menus")
 	@ResponseBody
