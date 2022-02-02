@@ -38,7 +38,6 @@ public class RegisterMenuHandler implements MenuHandler {
     }
 
     private static List<Province> allProvinces;
-    private static Menu menuResp;
 
     @Override
     public String handleMenu(UssdRequest ussdRequest, CurrentState currentState, MenuService menuService, OperationMetadataService operationMetadataService) {
@@ -64,16 +63,7 @@ public class RegisterMenuHandler implements MenuHandler {
 	    return navegate(currentMenu, ussdRequest, currentState, menuService);
 
 	} else {
-	    // seta o prmeiro menu como currentstate
-	    CurrentState stateMainMenu = new CurrentState();
-	    stateMainMenu.setSessionId(ussdRequest.getSessionId());
-	    stateMainMenu.setActive(true);
-	    stateMainMenu.setLocation(LocationType.MENU_PRINCIPAL.getCode());
-	    stateMainMenu.setPhoneNumber(ussdRequest.getPhoneNumber());
-	    stateMainMenu.setCreatedDate(LocalDateTime.now());
-	    menuService.saveCurrentState(stateMainMenu);
-	    return MessageUtils.getMenuText(menuResp);
-
+	    return MainMenuHandler.getInstance().handleMenu(ussdRequest, currentState, menuService, operationMetadataService);
 	}
 
     }
@@ -198,11 +188,12 @@ public class RegisterMenuHandler implements MenuHandler {
 	} else if (menu.getId() == ConstantUtils.MENU_PROVINCES_ID) {
 	    return MessageFormat.format(MessageUtils.getMenuText(menu), getProvincesMenu());
 	} else if (menu.getId() == ConstantUtils.MENU_DISTRICTS_ID) {
-	    //TODO: Buscar a provincia seleccionada na tabela de metadados e invocar o metodo que lista os distritos por provincia
-	  //  return MessageFormat.format(MessageUtils.getMenuText(menu), getDistrictsMenu(Integer.parseInt(request.getText()), allProvinces));
+	    // TODO: Buscar a provincia seleccionada na tabela de metadados e invocar o
+	    // metodo que lista os distritos por provincia
+	    // return MessageFormat.format(MessageUtils.getMenuText(menu),
+	    // getDistrictsMenu(Integer.parseInt(request.getText()), allProvinces));
 	}
 
-	 
 	return MessageUtils.getMenuText(menu);
     }
 
