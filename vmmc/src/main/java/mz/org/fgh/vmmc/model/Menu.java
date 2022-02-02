@@ -24,6 +24,9 @@ public class Menu {
 	@OneToMany(mappedBy = "parentMenu")
 	private List<Menu> menuItems;
 
+	@Column(name = "menuField")
+	private String menuField;
+
 	@ManyToOne
 	@JoinColumn(name = "parent_menu_id")
 	private Menu parentMenu;
@@ -31,11 +34,16 @@ public class Menu {
 	public Menu() {
 	}
 
-	public Menu(String code, String description, long nextMenuId) {
+	public Menu(long id, String code, String description, long nextMenuId, List<Menu> menuItems, Menu parentMenu,
+			String menuField) {
 		super();
+		this.id = id;
 		this.code = code;
 		this.description = description;
 		this.nextMenuId = nextMenuId;
+		this.menuItems = menuItems;
+		this.parentMenu = parentMenu;
+		this.menuField = menuField;
 	}
 
 	public String getDescription() {
@@ -84,6 +92,14 @@ public class Menu {
 
 	public void setParentMenu(Menu parentMenu) {
 		this.parentMenu = parentMenu;
+	}
+
+	public String getMenuField() {
+		return menuField;
+	}
+
+	public void setMenuField(String menuField) {
+		this.menuField = menuField;
 	}
 
 }

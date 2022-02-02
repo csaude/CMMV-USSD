@@ -13,7 +13,7 @@ import mz.org.fgh.vmmc.model.Menu;
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 	
 	@Query(value = "select u from CurrentState u where u.sessionId  = :sessionId") 
-	public List<CurrentState> findCurrentStateBySessionIdAndId(@Param("sessionId") String sessionId);
+	public List<CurrentState> findCurrentStateBySessionId(@Param("sessionId") String sessionId);
 	
 	
 	@Query(value = "select u from Menu u where parent_menu_id  = :id and u.code = :code") 
