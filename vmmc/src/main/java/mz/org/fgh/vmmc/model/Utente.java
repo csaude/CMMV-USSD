@@ -12,17 +12,32 @@ public class Utente implements Serializable {
 
 	private String firstNames;
 	private String lastNames;
-	private Date birthDate;
+	private String birthDate;
 	private String cellNumber;
-	private String whatsappNumber;
-	private String preferedLanguage;
-	private String documentType;
-	private String documentNumber;
-	private String systemNumber;
+	private String haspartner;
+	private String age;
+	private String address;
+	private String provinceId;
+	private String districtId;
+ 
 
 	public Utente() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+
+	public Utente(String firstNames, String lastNames, String birthDate, String cellNumber, String haspartner,
+			String age, String provinceId, String districtId ) {
+		super();
+		this.firstNames = firstNames;
+		this.lastNames = lastNames;
+		this.birthDate = birthDate;
+		this.cellNumber = cellNumber;
+		this.haspartner = haspartner;
+		this.age = age;
+		this.provinceId = provinceId;
+		this.districtId = districtId;
+		 
 	}
 
 	public String getFirstNames() {
@@ -41,11 +56,11 @@ public class Utente implements Serializable {
 		this.lastNames = lastNames;
 	}
 
-	public Date getBirthDate() {
+	public String getBirthDate() {
 		return birthDate;
 	}
 
-	public void setBirthDate(Date birthDate) {
+	public void setBirthDate(String birthDate) {
 		this.birthDate = birthDate;
 	}
 
@@ -57,44 +72,58 @@ public class Utente implements Serializable {
 		this.cellNumber = cellNumber;
 	}
 
-	public String getWhatsappNumber() {
-		return whatsappNumber;
+	public String getHaspartner() {
+		return haspartner;
 	}
 
-	public void setWhatsappNumber(String whatsappNumber) {
-		this.whatsappNumber = whatsappNumber;
+	public void setHaspartner(String haspartner) {
+		this.haspartner = haspartner;
 	}
 
-	public String getPreferedLanguage() {
-		return preferedLanguage;
+	public String getAge() {
+		return age;
 	}
 
-	public void setPreferedLanguage(String preferedLanguage) {
-		this.preferedLanguage = preferedLanguage;
+	public void setAge(String age) {
+		this.age = age;
 	}
 
-	public String getDocumentType() {
-		return documentType;
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	}
 
-	public void setDocumentType(String documentType) {
-		this.documentType = documentType;
+	public String getProvinceId() {
+		return provinceId;
 	}
 
-	public String getDocumentNumber() {
-		return documentNumber;
+	public void setProvinceId(String provinceId) {
+		this.provinceId = provinceId;
 	}
 
-	public void setDocumentNumber(String documentNumber) {
-		this.documentNumber = documentNumber;
+	public String getDistrictId() {
+		return districtId;
 	}
 
-	public String getSystemNumber() {
-		return systemNumber;
+	public void setDistrictId(String districtId) {
+		this.districtId = districtId;
 	}
 
-	public void setSystemNumber(String systemNumber) {
-		this.systemNumber = systemNumber;
+ 
+
+	public String getAddress() {
+	    return address;
 	}
+
+	public void setAddress(String address) {
+	    this.address = address;
+	}
+
+	@Override
+	public String toString() {
+	    return "Utente [firstNames=" + firstNames + ", lastNames=" + lastNames + ", birthDate=" + birthDate + ", cellNumber=" + cellNumber + ", haspartner=" + haspartner
+		    + ", age=" + age + ", address=" + address + ", provinceId=" + provinceId + ", districtId=" + districtId + "]";
+	}
+
+
 
 }

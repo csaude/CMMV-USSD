@@ -18,32 +18,32 @@ public class Menu {
 	@Column(name = "description")
 	private String description;
 
-	@Column(name = "level")
-	private String level;
-
-	/*
-	 * @OneToMany(mappedBy = "menu", fetch = FetchType.LAZY, cascade =
-	 * CascadeType.ALL) private List<MenuItem> menuItems;
-	 */
+	@Column(name = "nextMenuId")
+	private long nextMenuId;
 
 	@OneToMany(mappedBy = "parentMenu")
 	private List<Menu> menuItems;
 
-	@ManyToOne
-	 @JoinColumn(name="parent_menu_id")
-	private Menu parentMenu;
-	
-	
+	@Column(name = "menuField")
+	private String menuField;
 
-	
+	@ManyToOne
+	@JoinColumn(name = "parent_menu_id")
+	private Menu parentMenu;
+
 	public Menu() {
 	}
 
-	public Menu(String code, String description, String level) {
+	public Menu(long id, String code, String description, long nextMenuId, List<Menu> menuItems, Menu parentMenu,
+			String menuField) {
 		super();
+		this.id = id;
 		this.code = code;
 		this.description = description;
-		this.level = level;
+		this.nextMenuId = nextMenuId;
+		this.menuItems = menuItems;
+		this.parentMenu = parentMenu;
+		this.menuField = menuField;
 	}
 
 	public String getDescription() {
@@ -66,12 +66,16 @@ public class Menu {
 		return id;
 	}
 
-	public String getLevel() {
-		return level;
+	public long getNextMenuId() {
+		return nextMenuId;
 	}
 
-	public void setLevel(String level) {
-		this.level = level;
+	public void setNextMenuId(long nextMenu) {
+		this.nextMenuId = nextMenu;
+	}
+
+	public void setId(long id) {
+		this.id = id;
 	}
 
 	public List<Menu> getMenuItems() {
@@ -81,15 +85,21 @@ public class Menu {
 	public void setMenuItems(List<Menu> menuItems) {
 		this.menuItems = menuItems;
 	}
-	
+
 	public Menu getParentMenu() {
 		return parentMenu;
 	}
-	
+
 	public void setParentMenu(Menu parentMenu) {
 		this.parentMenu = parentMenu;
 	}
 
+	public String getMenuField() {
+		return menuField;
+	}
 
+	public void setMenuField(String menuField) {
+		this.menuField = menuField;
+	}
 
 }

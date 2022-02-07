@@ -7,5 +7,7 @@ import mz.org.fgh.vmmc.model.CurrentState;
 public interface CurrentStateRepository  extends JpaRepository<CurrentState, Long> {
 	
 	public CurrentState findBySessionId (String sessionId);
+	
+	public CurrentState findByPhoneNumber (String phoneNumber);
 
 }
