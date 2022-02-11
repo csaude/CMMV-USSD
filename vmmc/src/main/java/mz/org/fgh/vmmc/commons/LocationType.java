@@ -2,7 +2,7 @@ package mz.org.fgh.vmmc.commons;
 
 public enum LocationType {
 
-	MENU_PRINCIPAL("MENU_PRINCIPAL"), MENU_CADASTRO("CADASTRO"), MENU_LOGIN("LOGIN");
+	MENU_PRINCIPAL("PRINCIPAL"), MENU_CADASTRO("CADASTRO"), MENU_LOGIN("LOGIN");
 
 	private String code;
 

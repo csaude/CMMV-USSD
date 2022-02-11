@@ -10,8 +10,8 @@ import mz.org.fgh.vmmc.service.OperationMetadataService;
 @Service
 public interface MenuHandler {
 
-	public String handleMenu(UssdRequest ussdRequest,CurrentState currentState, MenuService menuService, OperationMetadataService  operationMetadataService);
+	public String handleMenu(UssdRequest ussdRequest,CurrentState currentState, MenuService menuService, OperationMetadataService  operationMetadataService) throws Throwable;
 	
-	public String recoverSession( CurrentState currentState, MenuService menuService);
+	public String recoverSession( CurrentState currentState, MenuService menuService) throws Throwable;
 
 }

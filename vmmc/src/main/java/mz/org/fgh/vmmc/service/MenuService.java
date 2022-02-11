@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import mz.org.fgh.vmmc.model.CurrentState;
 import mz.org.fgh.vmmc.model.Menu;
-import mz.org.fgh.vmmc.model.OperationMetadata;
 import mz.org.fgh.vmmc.repository.CurrentStateRepository;
 import mz.org.fgh.vmmc.repository.MenuRepository;
 
@@ -20,14 +19,14 @@ public class MenuService {
 
     @Autowired
     CurrentStateRepository stateRepo;
-
-    public Menu getCurrentMenuBySessionId(String sessionId) {
-	List<CurrentState> states = menuRepo.findCurrentStateBySessionId(sessionId);
+    
+    public Menu getCurrentMenuBySessionId(String sessionId, boolean isActive) {
+	List<CurrentState> states = menuRepo.findCurrentStateBySessionId(sessionId,isActive);
 	return !states.isEmpty() ? menuRepo.findById(states.get(0).getIdMenu()).get() : null;
     }
 
     public Optional<Menu> getCurrentMenuBySessionId(Long menuId, String inputText) {
-	List<Menu> menus = menuRepo.findByMenuIdAndCode(menuId, inputText);
+	List<Menu> menus = menuRepo.findByMenuIdAndOption(menuId, inputText);
 	return !menus.isEmpty() ? Optional.of(menus.get(0)) : Optional.empty();
     }
 
@@ -41,7 +40,7 @@ public class MenuService {
     }
 
     public Long saveCurrentState(CurrentState currentState) {
-	CurrentState state = stateRepo.findBySessionId(currentState.getSessionId());
+	CurrentState state = stateRepo.findBySessionIdAndIsActive(currentState.getSessionId(), true);
 	if (state == null) {
 	    return stateRepo.save(currentState).getId();
 	} else {
@@ -49,7 +48,7 @@ public class MenuService {
 	    state.setSessionId(currentState.getSessionId());
 	    state.setLocation(currentState.getLocation());
 	    state.setCreatedDate(currentState.getCreatedDate());
-	    state.setPhoneNumber(currentState.getPhoneNumber());
+	    state.setPhoneNumber(currentState.getPhoneNumber()); 
 	    return stateRepo.save(state).getId();
 	}
 
@@ -57,12 +56,12 @@ public class MenuService {
 
     public CurrentState findCurrentStateBySessionId(String sessionId) {
 
-	return stateRepo.findBySessionId(sessionId);
+	return stateRepo.findBySessionIdAndIsActive(sessionId,true);
     }
-    
-    public CurrentState findCurrentStateByPhoneNumber(String phoneNumber) {
 
-  	return stateRepo.findByPhoneNumber(phoneNumber);
-      }
+    public CurrentState findCurrentStateByPhoneNumber(String phoneNumber, boolean isActive) {
+
+	return stateRepo.findByPhoneNumberAndIsActive(phoneNumber,isActive);
+    }
 
 }

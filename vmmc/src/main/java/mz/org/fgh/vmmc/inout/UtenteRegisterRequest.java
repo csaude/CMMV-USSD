@@ -1,23 +1,29 @@
 package mz.org.fgh.vmmc.inout;
 
-import java.util.Date;
+import java.io.Serializable;
 
 import mz.org.fgh.vmmc.model.Address;
 
-public class UtenteRegisterRequest {
+ 
+public class UtenteRegisterRequest implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     private String firstNames;
     private String lastNames;
-    private Date birthDate;
+    private String birthDate;
     private String cellNumber;
     private String whatsappNumber;
     private String preferedLanguage;
     private String documentType;
     private String documentNumber;
     private String systemNumber;
-    private String haspartner;
+    private boolean haspartner;
     private String age;
     private String status;
     private Address address;
+    private String registerDate;
 
     public String getFirstNames() {
 	return firstNames;
@@ -35,11 +41,11 @@ public class UtenteRegisterRequest {
 	this.lastNames = lastNames;
     }
 
-    public Date getBirthDate() {
+    public String getBirthDate() {
 	return birthDate;
     }
 
-    public void setBirthDate(Date birthDate) {
+    public void setBirthDate(String birthDate) {
 	this.birthDate = birthDate;
     }
 
@@ -91,11 +97,11 @@ public class UtenteRegisterRequest {
 	this.systemNumber = systemNumber;
     }
 
-    public String getHaspartner() {
+    public boolean getHaspartner() {
 	return haspartner;
     }
 
-    public void setHaspartner(String haspartner) {
+    public void setHaspartner(boolean haspartner) {
 	this.haspartner = haspartner;
     }
 
@@ -122,5 +128,14 @@ public class UtenteRegisterRequest {
     public void setAddress(Address address) {
 	this.address = address;
     }
+
+    public String getRegisterDate() {
+        return registerDate;
+    }
+
+    public void setRegisterDate(String registerDate) {
+        this.registerDate = registerDate;
+    }
+    
 
 }

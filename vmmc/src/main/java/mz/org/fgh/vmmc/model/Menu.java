@@ -8,98 +8,108 @@ import javax.persistence.*;
 @Table(name = "Menu")
 public class Menu {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
-	@Column(name = "code")
-	private String code;
+    @Column(name = "code")
+    private String code;
 
-	@Column(name = "description")
-	private String description;
+    @Column(name = "option")
+    private String option;
 
-	@Column(name = "nextMenuId")
-	private long nextMenuId;
+    @Column(name = "description")
+    private String description;
 
-	@OneToMany(mappedBy = "parentMenu")
-	private List<Menu> menuItems;
+    @Column(name = "nextMenuId")
+    private long nextMenuId;
 
-	@Column(name = "menuField")
-	private String menuField;
+    @OneToMany(mappedBy = "parentMenu")
+    private List<Menu> menuItems;
 
-	@ManyToOne
-	@JoinColumn(name = "parent_menu_id")
-	private Menu parentMenu;
+    @Column(name = "menuField")
+    private String menuField;
 
-	public Menu() {
-	}
+    @ManyToOne
+    @JoinColumn(name = "parent_menu_id")
+    private Menu parentMenu;
 
-	public Menu(long id, String code, String description, long nextMenuId, List<Menu> menuItems, Menu parentMenu,
-			String menuField) {
-		super();
-		this.id = id;
-		this.code = code;
-		this.description = description;
-		this.nextMenuId = nextMenuId;
-		this.menuItems = menuItems;
-		this.parentMenu = parentMenu;
-		this.menuField = menuField;
-	}
+    public Menu() {
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public Menu(String code, String option, String description, long nextMenuId, List<Menu> menuItems, String menuField, Menu parentMenu) {
+	super();
+	this.code = code;
+	this.option = option;
+	this.description = description;
+	this.nextMenuId = nextMenuId;
+	this.menuItems = menuItems;
+	this.menuField = menuField;
+	this.parentMenu = parentMenu;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public String getDescription() {
+	return description;
+    }
 
-	public String getCode() {
-		return code;
-	}
+    public void setDescription(String description) {
+	this.description = description;
+    }
 
-	public void setCode(String code) {
-		this.code = code;
-	}
+    public String getCode() {
+	return code;
+    }
 
-	public long getId() {
-		return id;
-	}
+    public void setCode(String code) {
+	this.code = code;
+    }
 
-	public long getNextMenuId() {
-		return nextMenuId;
-	}
+    public long getId() {
+	return id;
+    }
 
-	public void setNextMenuId(long nextMenu) {
-		this.nextMenuId = nextMenu;
-	}
+    public long getNextMenuId() {
+	return nextMenuId;
+    }
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    public void setNextMenuId(long nextMenu) {
+	this.nextMenuId = nextMenu;
+    }
 
-	public List<Menu> getMenuItems() {
-		return menuItems;
-	}
+    public void setId(long id) {
+	this.id = id;
+    }
 
-	public void setMenuItems(List<Menu> menuItems) {
-		this.menuItems = menuItems;
-	}
+    public List<Menu> getMenuItems() {
+	return menuItems;
+    }
 
-	public Menu getParentMenu() {
-		return parentMenu;
-	}
+    public void setMenuItems(List<Menu> menuItems) {
+	this.menuItems = menuItems;
+    }
 
-	public void setParentMenu(Menu parentMenu) {
-		this.parentMenu = parentMenu;
-	}
+    public Menu getParentMenu() {
+	return parentMenu;
+    }
 
-	public String getMenuField() {
-		return menuField;
-	}
+    public void setParentMenu(Menu parentMenu) {
+	this.parentMenu = parentMenu;
+    }
 
-	public void setMenuField(String menuField) {
-		this.menuField = menuField;
-	}
+    public String getMenuField() {
+	return menuField;
+    }
+
+    public void setMenuField(String menuField) {
+	this.menuField = menuField;
+    }
+
+    public String getOption() {
+	return option;
+    }
+
+    public void setOption(String option) {
+	this.option = option;
+    }
 
 }

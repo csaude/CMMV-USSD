@@ -12,12 +12,12 @@ import mz.org.fgh.vmmc.model.Menu;
 //
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 	
-	@Query(value = "select u from CurrentState u where u.sessionId  = :sessionId") 
-	public List<CurrentState> findCurrentStateBySessionId(@Param("sessionId") String sessionId);
+	@Query(value = "select u from CurrentState u where u.sessionId  = :sessionId and u.isActive = :isActive") 
+	public List<CurrentState> findCurrentStateBySessionId(@Param("sessionId") String sessionId, @Param("isActive") boolean isActive);
 	
 	
-	@Query(value = "select u from Menu u where parent_menu_id  = :id and u.code = :code") 
-	public List<Menu> findByMenuIdAndCode(@Param("id") Long id , @Param("code") String code);
+	@Query(value = "select u from Menu u where parent_menu_id  = :id and u.option = :option") 
+	public List<Menu> findByMenuIdAndOption(@Param("id") Long id , @Param("option") String option);
 	
 
 }

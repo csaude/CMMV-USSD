@@ -1,6 +1,5 @@
 package mz.org.fgh.vmmc.controller;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -34,12 +33,12 @@ public class VmmcController {
     OperationMetadataService operationMetadataService;
 
     @PostMapping(path = "vmmcUssd")
-    public String ussdIngress(@RequestParam String sessionId, @RequestParam String serviceCode, @RequestParam String phoneNumber, @RequestParam String text) throws IOException {
+    public String ussdIngress(@RequestParam String sessionId, @RequestParam String serviceCode, @RequestParam String phoneNumber, @RequestParam String text) throws Throwable {
 
 	UssdRequest ussdRequest = new UssdRequest(sessionId, serviceCode, phoneNumber, MessageUtils.formatInputText(text));
 	long sessionRecoverTime = Long.parseLong(System.getProperty("sessionRecoverTime", "30"));
 
-	CurrentState currentState = menuService.findCurrentStateByPhoneNumber(phoneNumber);
+	CurrentState currentState = menuService.findCurrentStateByPhoneNumber(phoneNumber, true);
 
 	if (currentState != null) {
 
