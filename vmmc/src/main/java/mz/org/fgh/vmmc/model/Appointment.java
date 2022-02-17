@@ -3,16 +3,13 @@ package mz.org.fgh.vmmc.model;
 public class Appointment {
 
     private Long id;
-    private String appointmentDay;
-    private String appointmentMonth;
-    private Long clinicId;
 
-    public Appointment(String appointmentDay, String appointmentMonth, Long clinicId) {
-	super();
-	this.appointmentDay = appointmentDay;
-	this.appointmentMonth = appointmentMonth;
-	this.clinicId = clinicId;
-    }
+    private Long clinicId;
+    private String appointmentDate;
+    private String time;
+    private long orderNumer;
+    private boolean hasHappened;
+    private String visitDate;
 
     public Appointment() {
 	super();
@@ -26,22 +23,6 @@ public class Appointment {
 	this.id = id;
     }
 
-    public String getAppointmentDay() {
-	return appointmentDay;
-    }
-
-    public void setAppointmentDay(String appointmentDay) {
-	this.appointmentDay = appointmentDay;
-    }
-
-    public String getAppointmentMonth() {
-	return appointmentMonth;
-    }
-
-    public void setAppointmentMonth(String appointmentMonth) {
-	this.appointmentMonth = appointmentMonth;
-    }
-
     public Long getClinicId() {
 	return clinicId;
     }
@@ -50,9 +31,44 @@ public class Appointment {
 	this.clinicId = clinicId;
     }
 
-    @Override
-    public String toString() {
-	return "Appointment [id=" + id + ", appointmentDay=" + appointmentDay + ", appointmentMonth=" + appointmentMonth + ", clinicId=" + clinicId + "]";
+    public String getAppointmentDate() {
+	return appointmentDate;
+    }
+
+    public void setAppointmentDate(String appointmentDate) {
+	this.appointmentDate = appointmentDate;
+    }
+
+    public String getTime() {
+	return time;
+    }
+
+    public void setTime(String time) {
+	this.time = time;
+    }
+
+    public long getOrderNumer() {
+	return orderNumer;
+    }
+
+    public void setOrderNumer(long orderNumer) {
+	this.orderNumer = orderNumer;
+    }
+
+    public boolean isHasHappened() {
+	return hasHappened;
+    }
+
+    public void setHasHappened(boolean hasHappened) {
+	this.hasHappened = hasHappened;
+    }
+
+    public String getVisitDate() {
+	return visitDate;
+    }
+
+    public void setVisitDate(String visitDate) {
+	this.visitDate = visitDate;
     }
 
 }

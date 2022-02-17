@@ -15,7 +15,7 @@ public class MenuHandlerType {
     static {
 	menuHandlerTypes.put(LocationType.MENU_PRINCIPAL.getCode(), MainMenuHandler.getInstance());
 	menuHandlerTypes.put(LocationType.MENU_CADASTRO.getCode(), RegisterMenuHandler.getInstance());
-	menuHandlerTypes.put(LocationType.MENU_LOGIN.getCode(), LoginMenuHandler.getInstance());
+	menuHandlerTypes.put(LocationType.MENU_OPERACOES.getCode(), OperationsMenuHandler.getInstance());
     }
 
     public static HashMap<String, MenuHandler> getMenuHandlerTypes() {

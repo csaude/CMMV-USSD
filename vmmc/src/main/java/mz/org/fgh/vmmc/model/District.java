@@ -4,54 +4,54 @@ import java.io.Serializable;
 
 public class District implements Serializable {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-    private String code;
-    private String description;
-    private String id;
-    private String provinceId;
+       /**
+        * 
+        */
+       private static final long serialVersionUID = 1L;
+       private long id;
+       private String code;
+       private String description;
+       private String provinceId;
 
-    public District() {
-	super();
+       public District() {
+	     super();
 
-    }
+       }
 
-    public String getCode() {
-	return code;
-    }
+       public String getCode() {
+	     return code;
+       }
 
-    public void setCode(String code) {
-	this.code = code;
-    }
+       public void setCode(String code) {
+	     this.code = code;
+       }
 
-    public String getDescription() {
-	return description;
-    }
+       public String getDescription() {
+	     return description;
+       }
 
-    public String getId() {
-	return id;
-    }
+       public String getProvinceId() {
+	     return provinceId;
+       }
 
-    public String getProvinceId() {
-	return provinceId;
-    }
+       public static long getSerialversionuid() {
+	     return serialVersionUID;
+       }
 
-    public static long getSerialversionuid() {
-	return serialVersionUID;
-    }
+       public void setDescription(String description) {
+	     this.description = description;
+       }
 
-    public void setDescription(String description) {
-	this.description = description;
-    }
+       public long getId() {
+	     return id;
+       }
 
-    public void setId(String id) {
-	this.id = id;
-    }
+       public void setId(long id) {
+	     this.id = id;
+       }
 
-    public void setProvinceId(String provinceId) {
-	this.provinceId = provinceId;
-    }
+       public void setProvinceId(String provinceId) {
+	     this.provinceId = provinceId;
+       }
 
 }

@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.Constants.ConstantException;
 
 import mz.org.fgh.vmmc.model.Menu;
 
@@ -49,6 +50,17 @@ public class MessageUtils {
 	String[] textsArray = StringUtils.split(inputText, "*");
 	String formatedText = ArrayUtils.isNotEmpty(textsArray) ? textsArray[textsArray.length - 1] : inputText;
 	return removeAccent(formatedText);
+    }
+
+    public static boolean isValidOption(Menu menu, String inputText) {
+
+	return menu.getMenuItems().stream().filter(o -> o.getOption().equals(inputText)).findFirst().isPresent()
+		|| ( ConstantUtils.MENU_CLINICS_PATIENT_CODE.equalsIgnoreCase(menu.getCode()) 
+		|| ConstantUtils.MENU_DISTRICTS_CODE.equalsIgnoreCase(menu.getCode())
+		|| ConstantUtils.MENU_CLINICS_CODE.equalsIgnoreCase(menu.getCode()))
+		||menu.getMenuItems().size()==1  //se tiver o submenu default 0. Voltar
+		;
+
     }
 
 }
