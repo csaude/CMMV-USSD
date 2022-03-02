@@ -2,7 +2,6 @@ package mz.org.fgh.vmmc.model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -66,7 +65,6 @@ public class CurrentState implements Serializable {
     public boolean isActive() {
 	return isActive;
     }
-
     public void setId(Long id) {
 	this.id = id;
     }
@@ -86,6 +84,8 @@ public class CurrentState implements Serializable {
     public void setActive(boolean isActive) {
 	this.isActive = isActive;
     }
+    
+    
 
     public String getLocation() {
 	return location;

@@ -1,129 +1,130 @@
 package mz.org.fgh.vmmc.model;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class Utente implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private Long id;
+    private String firstNames;
+    private String lastNames;
+    private String birthDate;
+    private String cellNumber;
+    private boolean haspartner;
+    private String age;
+    private String address;
+    private String provinceId;
+    private String districtId;
 
-	private String firstNames;
-	private String lastNames;
-	private String birthDate;
-	private String cellNumber;
-	private String haspartner;
-	private String age;
-	private String address;
-	private String provinceId;
-	private String districtId;
- 
+    public Utente() {
+	super();
+	// TODO Auto-generated constructor stub
+    }
 
-	public Utente() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+    public Utente(String firstNames, String lastNames, String birthDate, String cellNumber, boolean haspartner, String age, String provinceId, String districtId) {
+	super();
+	this.firstNames = firstNames;
+	this.lastNames = lastNames;
+	this.birthDate = birthDate;
+	this.cellNumber = cellNumber;
+	this.haspartner = haspartner;
+	this.age = age;
+	this.provinceId = provinceId;
+	this.districtId = districtId;
 
-	public Utente(String firstNames, String lastNames, String birthDate, String cellNumber, String haspartner,
-			String age, String provinceId, String districtId ) {
-		super();
-		this.firstNames = firstNames;
-		this.lastNames = lastNames;
-		this.birthDate = birthDate;
-		this.cellNumber = cellNumber;
-		this.haspartner = haspartner;
-		this.age = age;
-		this.provinceId = provinceId;
-		this.districtId = districtId;
-		 
-	}
+    }
 
-	public String getFirstNames() {
-		return firstNames;
-	}
+    public Long getId() {
+	return id;
+    }
 
-	public void setFirstNames(String firstNames) {
-		this.firstNames = firstNames;
-	}
+    public void setId(Long id) {
+	this.id = id;
+    }
 
-	public String getLastNames() {
-		return lastNames;
-	}
+    public String getFirstNames() {
+	return firstNames;
+    }
 
-	public void setLastNames(String lastNames) {
-		this.lastNames = lastNames;
-	}
+    public void setFirstNames(String firstNames) {
+	this.firstNames = firstNames;
+    }
 
-	public String getBirthDate() {
-		return birthDate;
-	}
+    public String getLastNames() {
+	return lastNames;
+    }
 
-	public void setBirthDate(String birthDate) {
-		this.birthDate = birthDate;
-	}
+    public void setLastNames(String lastNames) {
+	this.lastNames = lastNames;
+    }
 
-	public String getCellNumber() {
-		return cellNumber;
-	}
+    public String getBirthDate() {
+	return birthDate;
+    }
 
-	public void setCellNumber(String cellNumber) {
-		this.cellNumber = cellNumber;
-	}
+    public void setBirthDate(String birthDate) {
+	this.birthDate = birthDate;
+    }
 
-	public String getHaspartner() {
-		return haspartner;
-	}
+    public String getCellNumber() {
+	return cellNumber;
+    }
 
-	public void setHaspartner(String haspartner) {
-		this.haspartner = haspartner;
-	}
+    public void setCellNumber(String cellNumber) {
+	this.cellNumber = cellNumber;
+    }
 
-	public String getAge() {
-		return age;
-	}
+    public boolean getHaspartner() {
+	return haspartner;
+    }
 
-	public void setAge(String age) {
-		this.age = age;
-	}
+    public void setHaspartner(boolean haspartner) {
+	this.haspartner = haspartner;
+    }
 
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
+    public String getAge() {
+	return age;
+    }
 
-	public String getProvinceId() {
-		return provinceId;
-	}
+    public void setAge(String age) {
+	this.age = age;
+    }
 
-	public void setProvinceId(String provinceId) {
-		this.provinceId = provinceId;
-	}
+    public static long getSerialversionuid() {
+	return serialVersionUID;
+    }
 
-	public String getDistrictId() {
-		return districtId;
-	}
+    public String getProvinceId() {
+	return provinceId;
+    }
 
-	public void setDistrictId(String districtId) {
-		this.districtId = districtId;
-	}
+    public void setProvinceId(String provinceId) {
+	this.provinceId = provinceId;
+    }
 
- 
+    public String getDistrictId() {
+	return districtId;
+    }
 
-	public String getAddress() {
-	    return address;
-	}
+    public void setDistrictId(String districtId) {
+	this.districtId = districtId;
+    }
 
-	public void setAddress(String address) {
-	    this.address = address;
-	}
+    public String getAddress() {
+	return address;
+    }
 
-	@Override
-	public String toString() {
-	    return "Utente [firstNames=" + firstNames + ", lastNames=" + lastNames + ", birthDate=" + birthDate + ", cellNumber=" + cellNumber + ", haspartner=" + haspartner
-		    + ", age=" + age + ", address=" + address + ", provinceId=" + provinceId + ", districtId=" + districtId + "]";
-	}
+    public void setAddress(String address) {
+	this.address = address;
+    }
 
-
+    @Override
+    public String toString() {
+	return "Utente [firstNames=" + firstNames + ", lastNames=" + lastNames + ", birthDate=" + birthDate + ", cellNumber=" + cellNumber + ", haspartner=" + haspartner + ", age="
+		+ age + ", address=" + address + ", provinceId=" + provinceId + ", districtId=" + districtId + "]";
+    }
 
 }

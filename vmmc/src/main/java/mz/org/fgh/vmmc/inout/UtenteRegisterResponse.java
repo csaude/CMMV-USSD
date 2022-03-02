@@ -1,30 +1,30 @@
 package mz.org.fgh.vmmc.inout;
 
 public class UtenteRegisterResponse extends GenericResponse {
-    private String registerCode;
 
-    public UtenteRegisterResponse(String registerCode) {
-	super();
-	this.registerCode = registerCode;
-    }
+    private String systemNumber;
 
     public UtenteRegisterResponse() {
 	super();
-
     }
 
-    public String getRegisterCode() {
-	return registerCode;
+    public UtenteRegisterResponse(int status, String message) {
+	super(status, message);
     }
 
-    public void setRegisterCode(String registerCode) {
-	this.registerCode = registerCode;
+    public String getSystemNumber() {
+	return systemNumber;
+    }
+
+    public void setSystemNumber(String systemNumber) {
+	this.systemNumber = systemNumber;
     }
 
     @Override
     public String toString() {
-	return "UtenteRegisterResponse [registerCode=" + registerCode + "]";
+	return "UtenteRegisterResponse [systemNumber=" + systemNumber + "]";
     }
-
     
+    
+
 }

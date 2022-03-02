@@ -1,22 +1,39 @@
 package mz.org.fgh.vmmc.inout;
 
-public abstract class GenericResponse {
+public class GenericResponse {
 
-    private long errorCode;
-    private String errorMessage;
+    private int statusCode;
+    private String message;
 
-    public long getErrorCode() {
-	return errorCode;
+    public GenericResponse() {
+	super();
     }
 
-    public void setErrorCode(long errorCode) {
-	this.errorCode = errorCode;
+    public GenericResponse(int status, String message) {
+	super();
+	this.statusCode = status;
+	this.message = message;
+    }
+
+    public String getMessage() {
+	return message;
+    }
+
+    public void setMessage(String message) {
+	this.message = message;
+    }
+
+    public int getStatusCode() {
+	return statusCode;
+    }
+
+    public void setStatusCode(int statusCode) {
+	this.statusCode = statusCode;
     }
 
     @Override
     public String toString() {
-	return "GenericResponse [errorCode=" + errorCode + ", errorMessage=" + errorMessage + "]";
+	return "GenericResponse [statusCode=" + statusCode + ", message=" + message + "]";
     }
 
-    
 }
