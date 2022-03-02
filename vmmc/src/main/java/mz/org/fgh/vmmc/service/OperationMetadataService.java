@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -20,6 +19,7 @@ import mz.org.fgh.vmmc.inout.AppointmentRequest;
 import mz.org.fgh.vmmc.inout.UssdRequest;
 import mz.org.fgh.vmmc.inout.UtenteRegisterRequest;
 import mz.org.fgh.vmmc.model.Address;
+import mz.org.fgh.vmmc.model.CurrentState;
 import mz.org.fgh.vmmc.model.District;
 import mz.org.fgh.vmmc.model.OperationMetadata;
 import mz.org.fgh.vmmc.repository.OperationMetadataRepository;
@@ -32,7 +32,7 @@ public class OperationMetadataService {
        OperationMetadataRepository operationMetadataRepository;
 
        public OperationMetadata saveOperationMetadata(OperationMetadata operationMetadata) {
-	     OperationMetadata metadata = operationMetadataRepository.findBySessionIdAndMenuIdAndOperationType(operationMetadata.getSessionId(),
+	     OperationMetadata metadata = operationMetadataRepository.findByCurrentStateIdAndMenuIdAndOperationType(operationMetadata.getCurrentState().getId(),
 			 operationMetadata.getMenu().getId(), operationMetadata.getOperationType());
 
 	     if (metadata == null) {
@@ -44,16 +44,16 @@ public class OperationMetadataService {
 	     }
        }
 
-       public Map<String, OperationMetadata> getMetadatasByOperationTypeAndSessionId(String sessionId, String operationType) {
+       public Map<String, OperationMetadata> getMetadatasByOperationTypeAndSessionId(long currentStateId, String operationType) {
 
-	     List<OperationMetadata> metadataList = operationMetadataRepository.findBySessionIdAndOperationType(sessionId, operationType);
+	     List<OperationMetadata> metadataList = operationMetadataRepository.findByCurrentStateIdAndOperationType(currentStateId, operationType);
 	     Map<String, OperationMetadata> map = metadataList.stream().collect(Collectors.toMap(OperationMetadata::getAttrName, Function.identity()));
 	     return map;
        }
 
-       public UtenteRegisterRequest createUtenteByMetadatas(UssdRequest ussdRequest, String operationType) {
+       public UtenteRegisterRequest createUtenteByMetadatas(UssdRequest ussdRequest, String operationType, CurrentState currentState) {
 
-	     Map<String, OperationMetadata> metadatas = getMetadatasByOperationTypeAndSessionId(ussdRequest.getSessionId(), operationType);
+	     Map<String, OperationMetadata> metadatas = getMetadatasByOperationTypeAndSessionId(currentState.getId(), operationType);
 	     int year = LocalDate.now().getYear() - Integer.parseInt(metadatas.get("age").getAttrValue());
 	     int month = LocalDate.now().getMonthValue();
 	     int day = LocalDate.now().getDayOfMonth();
@@ -87,16 +87,18 @@ public class OperationMetadataService {
 
        }
 
-       public AppointmentRequest createAppointmentRequestByMetadatas(UssdRequest ussdRequest, String operationType) {
+       public AppointmentRequest createAppointmentRequestByMetadatas(UssdRequest ussdRequest, String operationType, CurrentState currentState) {
 
-	     Map<String, OperationMetadata> metadatas = getMetadatasByOperationTypeAndSessionId(ussdRequest.getSessionId(), operationType);
+	     Map<String, OperationMetadata> metadatas = getMetadatasByOperationTypeAndSessionId(currentState.getId(), operationType);
 
 	     int appointmentDay = Integer.parseInt(metadatas.get("appointmentDay").getAttrValue());
 	     int appointmentMonth = Integer.parseInt(metadatas.get("appointmentMonth").getAttrValue());
 
+	     String appointmentDate = DateUtils.formatDateByMonthAndDay(appointmentDay, appointmentMonth);
+
 	     AppointmentRequest request = new AppointmentRequest();
 
-	     request.setAppointmentDate(DateUtils.formatDateByMonthAndDay(appointmentDay, appointmentMonth));
+	     request.setAppointmentDate(appointmentDate);
 	     request.setOrderNumer(1);
 	     request.setStatus(AppointmentStatus.APPOINTMENT_PENDING.getCode());
 	     request.setTime("0:0"); // TODO: Rever
@@ -110,18 +112,22 @@ public class OperationMetadataService {
 
 	     String appointmentDate = DateUtils.getSimpleDateFormat(data.getAppointmentDate());
 	     StringBuilder sb = new StringBuilder();
-	     return sb.append("\n Data:").append(appointmentDate).toString();
+	     return sb.append("\n Data:").append(appointmentDate).append("\n Unidade Sanitaria: ").append(data.getClinicName()).toString();
 
        }
 
        public String getRegisterConfirmationData(UtenteRegisterRequest data) {
 
 	     StringBuilder sb = new StringBuilder();
-	     return sb.append("\n Nome:").append(data.getFirstNames()).append(" ").append(data.getLastNames()).append("\n Idade:").append(data.getAge()).append("\n Data Nasc: ")
-			 .append(DateUtils.getSimpleDateFormat(data.getBirthDate())).toString();
+	     return sb.append("\n Nome:").append(data.getFirstNames()).append(" ").append(data.getLastNames()).append("\n Idade:").append(data.getAge()).append("\n Telefone:")
+			 .append(data.getCellNumber()).append("\n Endereco:").append(data.getAddresses()[0].getResidence()).append("\n Tem parceiro:")
+			 .append(data.getHaspartner() ? "Sim" : "Nao").toString();
        }
 
-       public void updateOperationMetadataSessionId(String sessionId, String phoneNumber) {
-	     operationMetadataRepository.updateOperationMetadataSessionId(sessionId, phoneNumber);
-       }
+       /*
+        * public void updateOperationMetadataSessionId(String sessionId, String
+        * phoneNumber) {
+        * operationMetadataRepository.updateOperationMetadataSessionId(sessionId,
+        * phoneNumber); }
+        */
 }

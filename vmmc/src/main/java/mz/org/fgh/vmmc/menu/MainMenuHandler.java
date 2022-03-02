@@ -2,11 +2,10 @@ package mz.org.fgh.vmmc.menu;
 
 import java.time.LocalDateTime;
 
-import javax.servlet.http.HttpSession;
-
 import mz.org.fgh.vmmc.commons.LocationType;
 import mz.org.fgh.vmmc.inout.UssdRequest;
 import mz.org.fgh.vmmc.model.CurrentState;
+import mz.org.fgh.vmmc.service.InfoMessageService;
 import mz.org.fgh.vmmc.service.MenuService;
 import mz.org.fgh.vmmc.service.OperationMetadataService;
 import mz.org.fgh.vmmc.service.SessionDataService;
@@ -25,14 +24,16 @@ public class MainMenuHandler implements MenuHandler {
 
        @Override
        public String handleMenu(UssdRequest ussdRequest, CurrentState currentState, MenuService menuService, OperationMetadataService operationMetadataService,
-		   SessionDataService sessionDataService, HttpSession session) {
+		   SessionDataService sessionDataService, InfoMessageService infoMessageService) {
 
 	     if (currentState == null) {
 		   menuService.saveCurrentState(
 			        new CurrentState(ussdRequest.getSessionId(), 1, true, LocationType.MENU_PRINCIPAL.getCode(), ussdRequest.getPhoneNumber(), LocalDateTime.now()));
 	     } else {
-		   currentState.setActive(false);
+		   currentState.setActive(true);
+		   currentState.setIdMenu(1);
 		   currentState.setLocation(LocationType.MENU_PRINCIPAL.getCode());
+		   currentState.setSessionId(ussdRequest.getSessionId());
 		   menuService.saveCurrentState(currentState);
 
 	     }
@@ -40,11 +41,13 @@ public class MainMenuHandler implements MenuHandler {
        }
 
        @Override
-       public String recoverSession(UssdRequest request, CurrentState currentState, MenuService menuService, OperationMetadataService operationMetadataService) {
+       public String recoverSession(UssdRequest request, CurrentState currentState, MenuService menuService, SessionDataService sessionDataService) {
 
 	     if (currentState != null) {
 		   currentState.setActive(false);
 		   currentState.setLocation(LocationType.MENU_PRINCIPAL.getCode());
+		   currentState.setSessionId(request.getSessionId());
+		   menuService.saveCurrentState(currentState);
 	     }
 	     return ConstantUtils.MENU_PRINCIPAL_DESCRIPTION;
        }

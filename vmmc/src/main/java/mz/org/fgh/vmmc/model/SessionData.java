@@ -22,8 +22,8 @@ public class SessionData implements Serializable {
        @GeneratedValue(strategy = GenerationType.IDENTITY)
        private long id;
 
-       @Column(name = "sessionId")
-       private String sessionId;
+       @Column(name = "currentStateId")
+       private long currentStateId;
 
        @Column(name = "attrName")
        private String attrName;
@@ -35,9 +35,9 @@ public class SessionData implements Serializable {
 	     super();
        }
 
-       public SessionData(String sessionId, String attrName, String attrValue) {
+       public SessionData(long currentStateId, String attrName, String attrValue) {
 	     super();
-	     this.sessionId = sessionId;
+	     this.currentStateId = currentStateId;
 	     this.attrName = attrName;
 	     this.attrValue = attrValue;
        }
@@ -66,17 +66,17 @@ public class SessionData implements Serializable {
 	     this.attrValue = attrValue;
        }
 
-       public String getSessionId() {
-	     return sessionId;
+       public long getCurrentStateId() {
+	     return currentStateId;
        }
 
-       public void setSessionId(String sessionId) {
-	     this.sessionId = sessionId;
+       public void setCurrentStateId(long currentStateId) {
+	     this.currentStateId = currentStateId;
        }
 
        @Override
        public String toString() {
-	     return "SessionData [id=" + id + ", sessionId=" + sessionId + ", attrName=" + attrName + ", attrValue=" + attrValue + "]";
+	     return "SessionData [id=" + id + ", currentStateId=" + currentStateId + ", attrName=" + attrName + ", attrValue=" + attrValue + "]";
        }
 
 }

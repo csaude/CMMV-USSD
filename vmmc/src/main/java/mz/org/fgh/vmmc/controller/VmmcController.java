@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import javax.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +15,7 @@ import mz.org.fgh.vmmc.inout.UssdRequest;
 import mz.org.fgh.vmmc.menu.MenuHandler;
 import mz.org.fgh.vmmc.menu.MenuHandlerType;
 import mz.org.fgh.vmmc.model.CurrentState;
+import mz.org.fgh.vmmc.service.InfoMessageService;
 import mz.org.fgh.vmmc.service.MenuService;
 import mz.org.fgh.vmmc.service.OperationMetadataService;
 import mz.org.fgh.vmmc.service.SessionDataService;
@@ -38,9 +37,11 @@ public class VmmcController {
        @Autowired
        SessionDataService sessionDataService;
 
+       @Autowired
+       InfoMessageService infoMessageService;
+
        @PostMapping(path = "vmmcUssd")
-       public String ussdIngress(@RequestParam String sessionId, @RequestParam String serviceCode, @RequestParam String phoneNumber, @RequestParam String text,
-		   HttpSession httpSession) throws Throwable {
+       public String ussdIngress(@RequestParam String sessionId, @RequestParam String serviceCode, @RequestParam String phoneNumber, @RequestParam String text) throws Throwable {
 
 	     UssdRequest ussdRequest = new UssdRequest(sessionId, serviceCode, phoneNumber, MessageUtils.formatInputText(text));
 	     long sessionRecoverTime = Long.parseLong(System.getProperty("sessionRecoverTime", "30"));
@@ -49,18 +50,18 @@ public class VmmcController {
 
 	     if (currentState != null) {
 		   long seconds = Duration.between(currentState.getCreatedDate(), LocalDateTime.now()).getSeconds();
-		   if (!currentState.getSessionId().equalsIgnoreCase(ussdRequest.getSessionId()) && seconds <= sessionRecoverTime) {
+		   if (isSessionExpired(ussdRequest, sessionRecoverTime, currentState, seconds)) {
 
 			 switch (ussdRequest.getText()) {
 			 case "":
-			        return ConstantUtils.MESSAGE_SESSION_RECOVER_DESCRIPTION;
+			        return ConstantUtils.MENU_SESSION_RECOVER_DESCRIPTION;
 			 case "1":
-			        return menuTypes.get(currentState.getLocation()).recoverSession(ussdRequest, currentState, menuService, operationMetadataService);
+			        return menuTypes.get(currentState.getLocation()).recoverSession(ussdRequest, currentState, menuService, sessionDataService);
 			 case "2":
 			        return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService,
-					    sessionDataService, httpSession);
+					    sessionDataService, infoMessageService);
 			 default:
-			        return ConstantUtils.MESSAGE_OPCAO_INVALIDA;
+			        return ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR;
 			 }
 
 		   } else if (currentState.getLocation().equalsIgnoreCase(LocationType.MENU_PRINCIPAL.getCode())) {
@@ -72,24 +73,32 @@ public class VmmcController {
 			 case "2":
 			        currentState.setLocation(LocationType.MENU_CADASTRO.getCode());
 			        break;
+			 case "":
+			        currentState.setLocation(LocationType.MENU_PRINCIPAL.getCode());
+			        break;
 			 default:
-			        return ConstantUtils.MESSAGE_OPCAO_INVALIDA;
+			        return ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR;
 
 			 }
 			 return menuTypes.get(currentState.getLocation()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService, sessionDataService,
-				      httpSession);
+				      infoMessageService);
 		   } else {
 			 return menuTypes.get(currentState.getLocation()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService, sessionDataService,
-				      httpSession);
+				      infoMessageService);
 		   }
 
 	     }
 
 	     else {
 		   return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService, sessionDataService,
-			        httpSession);
+			        infoMessageService);
 	     }
 
+       }
+
+       private boolean isSessionExpired(UssdRequest ussdRequest, long sessionRecoverTime, CurrentState currentState, long seconds) {
+	     return !currentState.getSessionId().equalsIgnoreCase(ussdRequest.getSessionId()) && seconds <= sessionRecoverTime
+			 && !currentState.getLocation().equalsIgnoreCase(LocationType.MENU_PRINCIPAL.getCode());
        }
 
 }

@@ -2,21 +2,33 @@ package mz.org.fgh.vmmc.model;
 
 import java.io.Serializable;
 
-public class District implements Serializable {
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
+@Entity
+@Table(name = "InfoMessage")
+public class InfoMessage implements Serializable {
        /**
         * 
         */
        private static final long serialVersionUID = 1L;
+
+       @Id
+       @GeneratedValue(strategy = GenerationType.IDENTITY)
        private long id;
+
+       @Column(name = "code")
        private String code;
+
+       @Column(name = "description")
        private String description;
-       private String provinceId;
-       private transient String option;
 
-       public District() {
+       public InfoMessage() {
 	     super();
-
        }
 
        public String getCode() {
@@ -31,14 +43,6 @@ public class District implements Serializable {
 	     return description;
        }
 
-       public String getProvinceId() {
-	     return provinceId;
-       }
-
-       public static long getSerialversionuid() {
-	     return serialVersionUID;
-       }
-
        public void setDescription(String description) {
 	     this.description = description;
        }
@@ -49,18 +53,6 @@ public class District implements Serializable {
 
        public void setId(long id) {
 	     this.id = id;
-       }
-
-       public void setProvinceId(String provinceId) {
-	     this.provinceId = provinceId;
-       }
-
-       public String getOption() {
-	     return option;
-       }
-
-       public void setOption(String option) {
-	     this.option = option;
        }
 
 }

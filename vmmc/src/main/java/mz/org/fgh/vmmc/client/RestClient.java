@@ -25,10 +25,12 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
-import mz.org.fgh.vmmc.inout.AppointmentSearchResponse;
 import mz.org.fgh.vmmc.inout.AppointmentRequest;
 import mz.org.fgh.vmmc.inout.AppointmentResponse;
+import mz.org.fgh.vmmc.inout.AppointmentSearchResponse;
 import mz.org.fgh.vmmc.inout.ClinicsResponse;
+import mz.org.fgh.vmmc.inout.SendSmsRequest;
+import mz.org.fgh.vmmc.inout.SendSmsResponse;
 import mz.org.fgh.vmmc.inout.UtenteRegisterRequest;
 import mz.org.fgh.vmmc.inout.UtenteRegisterResponse;
 import mz.org.fgh.vmmc.inout.UtenteSearchResponse;
@@ -40,6 +42,8 @@ public class RestClient {
 
        Logger LOG = Logger.getLogger(RestClient.class);
        private static String ENDPOINT = System.getProperty("endpoint");
+       private  String ENDPOINT_FRONTLINESMS = System.getProperty("endpointFSms","http://localhost:8080/api/1/webhook/");
+       private static String API_KEY_FRONTLINESMS = System.getProperty("apiKeyFrontlineSms");
 
        static RestTemplate restTemplate = new RestTemplate();
 
@@ -98,24 +102,26 @@ public class RestClient {
        }
 
        public AppointmentResponse makeAppointment(@RequestBody AppointmentRequest request) throws Throwable {
-
+	     AppointmentResponse responseReg = new AppointmentResponse();
 	     String token = RestClient.getInstance().login();
 	     ResteasyClient client = new ResteasyClientBuilder().build();
 	     ResteasyWebTarget target = client.target(ENDPOINT.concat("appointment"));
 	     Response response = target.request().header("X-Auth-Token", token).post(Entity.entity(request, "application/json"));
 	     String jsonValue = response.readEntity(String.class);
 	     if (response.getStatus() != Response.Status.OK.getStatusCode() && response.getStatus() != Response.Status.CREATED.getStatusCode()) {
-		   LOG.error("[RestClient.makeAppointment] response: " + jsonValue);
+		   LOG.error("[RestClient.makeAppointment] Erro ao efectuar a marcacao da consulta: ");
+		   responseReg.setStatusCode(response.getStatus());
+		   return responseReg;
 	     }
 	     Gson gson = new Gson();
-	     AppointmentResponse responseReg = gson.fromJson(jsonValue, AppointmentResponse.class);
+	     responseReg = gson.fromJson(jsonValue, AppointmentResponse.class);
 	     responseReg.setStatusCode(response.getStatus());
 	     response.close();
 	     return responseReg;
        }
 
        public ClinicsResponse getClinicsByDistrict(long districtId) {
-
+	     ClinicsResponse resp = new ClinicsResponse();
 	     String token = RestClient.getInstance().login();
 	     ResteasyClient client = new ResteasyClientBuilder().build();
 	     ResteasyWebTarget target = client.target(ENDPOINT.concat("clinic/district/")).path(districtId + "");
@@ -123,10 +129,11 @@ public class RestClient {
 	     String jsonValue = response.readEntity(String.class);
 	     if (response.getStatus() != Response.Status.OK.getStatusCode() && response.getStatus() != Response.Status.CREATED.getStatusCode()) {
 		   LOG.error("[RestClient.getClinicsByDistrict] response: " + jsonValue);
+		   resp.setStatusCode(response.getStatus());
+		   return resp;
 	     }
 	     Gson gson = new Gson();
 	     Clinic[] clinics = gson.fromJson(jsonValue, Clinic[].class);
-	     ClinicsResponse resp = new ClinicsResponse();
 	     resp.setClinics(Arrays.asList(clinics));
 	     resp.setStatusCode(response.getStatus());
 	     response.close();
@@ -134,35 +141,52 @@ public class RestClient {
        }
 
        public UtenteSearchResponse getUtenteBySystemNumber(String systemNumber) {
-
+	     UtenteSearchResponse responseUtente = new UtenteSearchResponse();
 	     ResteasyClient client = new ResteasyClientBuilder().build();
 	     ResteasyWebTarget target = client.target(ENDPOINT.concat("utente/search")).path(systemNumber);
 	     Response response = target.request().get();
 	     String jsonValue = response.readEntity(String.class);
 	     if (response.getStatus() != Response.Status.OK.getStatusCode() && response.getStatus() != Response.Status.CREATED.getStatusCode()) {
 		   LOG.error("[RestClient.getUtenteBySystemNumber] response: " + jsonValue);
+		   responseUtente.setStatusCode(response.getStatus());
+		   return responseUtente;
 	     }
 	     Gson gson = new Gson();
-	     UtenteSearchResponse responseUtente = gson.fromJson(jsonValue, UtenteSearchResponse.class);
+	     responseUtente = gson.fromJson(jsonValue, UtenteSearchResponse.class);
 	     responseUtente.setStatusCode(response.getStatus());
 	     response.close();
 	     return responseUtente;
        }
 
        public AppointmentSearchResponse getAppointmentByUtenteId(String utenteId) {
-
+	     AppointmentSearchResponse responseAppointment = new AppointmentSearchResponse();
 	     ResteasyClient client = new ResteasyClientBuilder().build();
 	     ResteasyWebTarget target = client.target(ENDPOINT.concat("appointment/search")).path(utenteId);
 	     Response response = target.request().get();
 	     String jsonValue = response.readEntity(String.class);
 	     if (response.getStatus() != Response.Status.OK.getStatusCode() && response.getStatus() != Response.Status.CREATED.getStatusCode()) {
 		   LOG.error("[RestClient.getAppointmentByUtenteIdO] response: " + jsonValue);
+		   responseAppointment.setStatusCode(response.getStatus());
+		   return responseAppointment;
 	     }
 	     Gson gson = new Gson();
-	     AppointmentSearchResponse responseUtente = gson.fromJson(jsonValue, AppointmentSearchResponse.class);
-	     responseUtente.setStatusCode(response.getStatus());
+	     responseAppointment = gson.fromJson(jsonValue, AppointmentSearchResponse.class);
+	     responseAppointment.setStatusCode(response.getStatus());
 	     response.close();
-	     return responseUtente;
+	     return responseAppointment;
+       }
+
+       public SendSmsResponse sendSms(SendSmsRequest request) {
+	     SendSmsResponse responseReg = new SendSmsResponse();
+	     ResteasyClient client = new ResteasyClientBuilder().build();
+	     ResteasyWebTarget target = client.target(ENDPOINT_FRONTLINESMS);
+	     request.setApiKey(API_KEY_FRONTLINESMS);
+	     Response response = target.request().post(Entity.entity(request, "application/json"));
+	     String jsonValue = response.readEntity(String.class);
+	     Gson gson = new Gson();
+	     responseReg = gson.fromJson(jsonValue, SendSmsResponse.class);
+	     response.close();
+	     return responseReg;
        }
 
 }

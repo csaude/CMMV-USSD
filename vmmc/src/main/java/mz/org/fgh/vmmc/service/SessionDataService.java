@@ -1,12 +1,13 @@
 package mz.org.fgh.vmmc.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mz.org.fgh.vmmc.inout.UtenteSearchResponse;
+import mz.org.fgh.vmmc.model.Address;
+import mz.org.fgh.vmmc.model.Clinic;
 import mz.org.fgh.vmmc.model.SessionData;
 import mz.org.fgh.vmmc.repository.SessionDataRepository;
 
@@ -16,18 +17,19 @@ public class SessionDataService {
        @Autowired
        SessionDataRepository sessionRepo;
 
-       public List<SessionData> getAllSessionDataBySessionId(String sessionId) {
-	     return sessionRepo.findBySessionId(sessionId);
+       public List<SessionData> getAllSessionDataBySessionId(long sessionId) {
+	     return sessionRepo.findByCurrentStateId(sessionId);
        }
 
-       public SessionData findBySessionIdAndAttrName(String sessionId, String attrName) {
+       public SessionData findByCurrentStateIdAndAttrName(long currentStateId, String attrName) {
 
-	     return sessionRepo.findBySessionIdAndAttrName(sessionId, attrName);
+	     List<SessionData> list = sessionRepo.findByCurrentStateIdAndAttrName(currentStateId, attrName);
+	     return list.isEmpty() ? null : list.get(list.size() - 1);
        }
 
-       public Long saveSessionMetadata(SessionData sessionData) {
+       public Long saveSessionData(SessionData sessionData) {
 
-	     SessionData sd = sessionRepo.findBySessionIdAndAttrName(sessionData.getSessionId(), sessionData.getAttrName());
+	     SessionData sd = findByCurrentStateIdAndAttrName(sessionData.getCurrentStateId(), sessionData.getAttrName());
 	     if (sd != null) {
 		   sd.setAttrValue(sessionData.getAttrValue());
 		   return sessionRepo.save(sd).getId();
@@ -37,23 +39,24 @@ public class SessionDataService {
 
        }
 
-       public long deleteAllBySessionId(String sessionId) {
+       public long deleteAllByCurrentStateId(long sessionId) {
 
-	     return sessionRepo.deleteBySessionId(sessionId);
+	     return sessionRepo.deleteByCurrentStateId(sessionId);
        }
 
-       public void saveSessionData(UtenteSearchResponse response, String sessionId) {
+       public void saveSessionData(UtenteSearchResponse response, long currentStateId) {
+	     Address address = response.getAddresses().get(0);
+	     SessionData utenteIdSd = new SessionData(currentStateId, "utenteId", String.valueOf(response.getId()));
+	     SessionData districtIdSd = new SessionData(currentStateId, "districtId", String.valueOf(address != null ? address.getDistrict().getId() : ""));
+	     saveSessionData(utenteIdSd);
+	     saveSessionData(districtIdSd);
+       }
 
-	     SessionData utenteIdSd = new SessionData(sessionId, "utenteId", String.valueOf(response.getId()));
-	     SessionData clinicIdSd = new SessionData(sessionId, "clinicId", String.valueOf(response.getClinicId()));
-	     SessionData districtIdSd = new SessionData(sessionId, "districtId", String.valueOf(response.getAddresses().get(0).getDistrict().getId()));
-
-	     List<SessionData> sessionDataList = new ArrayList<SessionData>();
-	     sessionDataList.add(utenteIdSd);
-	     sessionDataList.add(clinicIdSd);
-	     sessionDataList.add(districtIdSd);
-	     sessionRepo.saveAll(sessionDataList);
-
+       public void saveClinicOnSessionData(Clinic clinic, long currentStateId) {
+	     SessionData clinicIdSd = new SessionData(currentStateId, "clinicId", clinic.getId() + "");
+	     SessionData clinicNameSd = new SessionData(currentStateId, "clinicName", clinic.getName());
+	     saveSessionData(clinicIdSd);
+	     saveSessionData(clinicNameSd);
        }
 
 }
