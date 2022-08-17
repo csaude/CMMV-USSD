@@ -82,7 +82,12 @@ public class RegisterMenuHandler implements MenuHandler {
 						PayloadSms payload = new PayloadSms(smsBody, recipients);
 						SendSmsRequest smsRequest = new SendSmsRequest();
 						smsRequest.setPayload(payload);
+						try {
 						RestClient.getInstance().sendSms(smsRequest);
+						}
+						catch(Exception e) {
+						       LOG.error("[RegisterMenuHandler.handleMenu] Ocorreu um erro ao enviar SMS, apos o registo do utente: "+ussdRequest.getPhoneNumber() ,e);
+						}
 						return ConstantUtils.MENU_REGISTER_SUCCESS;
 
 					}
@@ -330,7 +335,7 @@ public class RegisterMenuHandler implements MenuHandler {
 
 		}
 
-		return MessageUtils.getMenuText(menu);
-	}
+	     return MessageUtils.getMenuText(menu);
+       }
 
 }
