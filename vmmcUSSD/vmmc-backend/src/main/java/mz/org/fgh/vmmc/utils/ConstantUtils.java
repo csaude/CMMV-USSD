@@ -47,6 +47,7 @@ public class ConstantUtils {
 
        // Selected Options
        public static final String TYPE_RECIEPIENT_MOBILE = "mobile";
+       public static final String FRONTLINE_SMS_CONFIG = "FRONTLINE_SMS_CONFIG";
        
        
 

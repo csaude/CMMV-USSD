@@ -24,9 +24,11 @@ import mz.org.fgh.vmmc.inout.UssdRequest;
 import mz.org.fgh.vmmc.inout.UtenteSearchResponse;
 import mz.org.fgh.vmmc.model.Clinic;
 import mz.org.fgh.vmmc.model.CurrentState;
+import mz.org.fgh.vmmc.model.FrontlineSmsConfig;
 import mz.org.fgh.vmmc.model.InfoMessage;
 import mz.org.fgh.vmmc.model.Menu;
 import mz.org.fgh.vmmc.model.OperationMetadata;
+import mz.org.fgh.vmmc.service.FrontlineSmsConfigService;
 import mz.org.fgh.vmmc.service.InfoMessageService;
 import mz.org.fgh.vmmc.service.MenuService;
 import mz.org.fgh.vmmc.service.OperationMetadataService;
@@ -57,7 +59,7 @@ public class OperationsMenuHandler implements MenuHandler {
 	@Override
 	public String handleMenu(UssdRequest ussdRequest, CurrentState currentState, MenuService menuService,
 			OperationMetadataService operationMetadataService, SessionDataService sessionDataService,
-			InfoMessageService infoMessageService) throws Throwable {
+			InfoMessageService infoMessageService, FrontlineSmsConfigService frontlineSmsConfigService) throws Throwable {
 
 		Menu currentMenu = menuService.getCurrentMenuBySessionId(currentState.getSessionId(), true);
 
@@ -109,6 +111,7 @@ public class OperationsMenuHandler implements MenuHandler {
 				} else if (ussdRequest.getText().equalsIgnoreCase("1")
 						&& ConstantUtils.MENU_CONFIRMATION_SMS_CLINICS_LIST_CODE
 								.equalsIgnoreCase(currentMenu.getCode())) {
+				       FrontlineSmsConfig configsSms = frontlineSmsConfigService.findFrontlineSmsConfigByCode(ConstantUtils.FRONTLINE_SMS_CONFIG).get(0);
 					// TODO: Enviar sms com a lista de clinicas
 					long districtId = Long.parseLong(sessionDataService
 							.findByCurrentStateIdAndAttrName(currentState.getId(), "districtId").getAttrValue());
@@ -123,7 +126,7 @@ public class OperationsMenuHandler implements MenuHandler {
 					PayloadSms payload = new PayloadSms(getClinicsForSms(clinics), recipients);
 					SendSmsRequest smsRequest = new SendSmsRequest();
 					smsRequest.setPayload(payload);
-					RestClient.getInstance().sendSms(smsRequest);
+					RestClient.getInstance().sendSms(smsRequest,configsSms);
 
 					return ConstantUtils.MESSAGE_SEND_SMS_CLINIC_LIST;
 
@@ -169,12 +172,12 @@ public class OperationsMenuHandler implements MenuHandler {
 			}
 
 			return navegate(currentMenu, ussdRequest, currentState, menuService, operationMetadataService,
-					sessionDataService, infoMessageService);
+					sessionDataService, infoMessageService,frontlineSmsConfigService);
 
 		} else {
 
 			return MainMenuHandler.getInstance().handleMenu(ussdRequest, currentState, menuService,
-					operationMetadataService, sessionDataService, infoMessageService);
+					operationMetadataService, sessionDataService, infoMessageService, frontlineSmsConfigService);
 
 		}
 
@@ -213,7 +216,7 @@ public class OperationsMenuHandler implements MenuHandler {
 	// Responsavel por passar para o proximo menu
 	private String navegate(Menu currentMenu, UssdRequest request, CurrentState currentState, MenuService menuService,
 			OperationMetadataService operationMetadataService, SessionDataService sessionDataService,
-			InfoMessageService infoMessageService) {
+			InfoMessageService infoMessageService, FrontlineSmsConfigService frontlineSmsConfigService) {
 
 		// UtenteSearchResponse utente = (UtenteSearchResponse)
 		// httpSession.getAttribute("utenteSession");
@@ -258,8 +261,9 @@ public class OperationsMenuHandler implements MenuHandler {
 			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CONFIRMATION_SMS_CLINICS_LIST_CODE)) {
 
 				nextMenu.setDescription(MessageFormat.format(nextMenu.getDescription(), request.getPhoneNumber()));
-			} else if (ConstantUtils.MENU_INFORMATIVE_MESSAGES.equalsIgnoreCase(currentMenu.getCode())) {
-
+			} else if (!"0".equalsIgnoreCase(request.getText()) && ConstantUtils.MENU_INFORMATIVE_MESSAGES.equalsIgnoreCase(currentMenu.getCode())) {
+			       FrontlineSmsConfig configsSms = frontlineSmsConfigService.findFrontlineSmsConfigByCode(ConstantUtils.FRONTLINE_SMS_CONFIG).get(0);
+				
 				List<InfoMessage> listMessage = infoMessageService.findMessagesByCode(menu.get().getCode());
 				for (InfoMessage message : listMessage) {
 					RecipientSms[] recipients = new RecipientSms[1];
@@ -267,11 +271,11 @@ public class OperationsMenuHandler implements MenuHandler {
 					PayloadSms payload = new PayloadSms(message.getDescription(), recipients);
 					SendSmsRequest smsRequest = new SendSmsRequest();
 					smsRequest.setPayload(payload);
-					RestClient.getInstance().sendSms(smsRequest);
+					RestClient.getInstance().sendSms(smsRequest,configsSms);
 				}
 				MenuUtils.resetSession(currentState, menuService);
 				return MessageFormat.format(ConstantUtils.MESSAGE_INFORMATIVE_MESSAGES, request.getPhoneNumber());
-			}
+			} 
 
 			return MessageUtils.getMenuText(nextMenu);
 
@@ -369,9 +373,11 @@ public class OperationsMenuHandler implements MenuHandler {
 				dis.setOption(key + "");
 				key++;
 			}
+			Integer lastElementIndex=pagingSize > clinicsList.size() ? clinicsList.size() : pagingSize; 
 			String menuText = getClinicsMenu(
-					clinicsList.subList(0, pagingSize > clinicsList.size() ? clinicsList.size() : pagingSize));
-			startIndex = pagingSize;
+					clinicsList.subList(0,lastElementIndex));
+			
+			startIndex = lastElementIndex;
 			lastIndex = startIndex + pagingSize;
 			return menuText;
 

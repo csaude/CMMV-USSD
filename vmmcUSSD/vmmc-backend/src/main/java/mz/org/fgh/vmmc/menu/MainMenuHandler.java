@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import mz.org.fgh.vmmc.commons.LocationType;
 import mz.org.fgh.vmmc.inout.UssdRequest;
 import mz.org.fgh.vmmc.model.CurrentState;
+import mz.org.fgh.vmmc.service.FrontlineSmsConfigService;
 import mz.org.fgh.vmmc.service.InfoMessageService;
 import mz.org.fgh.vmmc.service.MenuService;
 import mz.org.fgh.vmmc.service.OperationMetadataService;
@@ -24,7 +25,7 @@ public class MainMenuHandler implements MenuHandler {
 
        @Override
        public String handleMenu(UssdRequest ussdRequest, CurrentState currentState, MenuService menuService, OperationMetadataService operationMetadataService,
-		   SessionDataService sessionDataService, InfoMessageService infoMessageService) {
+		   SessionDataService sessionDataService, InfoMessageService infoMessageService, FrontlineSmsConfigService frontlineCSmsConfigService) {
 
 	     if (currentState == null) {
 		   menuService.saveCurrentState(

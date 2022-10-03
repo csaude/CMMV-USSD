@@ -35,6 +35,7 @@ import mz.org.fgh.vmmc.inout.UtenteRegisterRequest;
 import mz.org.fgh.vmmc.inout.UtenteRegisterResponse;
 import mz.org.fgh.vmmc.inout.UtenteSearchResponse;
 import mz.org.fgh.vmmc.model.Clinic;
+import mz.org.fgh.vmmc.model.FrontlineSmsConfig;
 import mz.org.fgh.vmmc.model.Login;
 import mz.org.fgh.vmmc.model.Province;
 
@@ -177,11 +178,11 @@ public class RestClient {
 	     return responseAppointment;
        }
 
-       public SendSmsResponse sendSms(SendSmsRequest request) {
+       public SendSmsResponse sendSms(SendSmsRequest request, FrontlineSmsConfig configsSms) {
 	     SendSmsResponse responseReg = new SendSmsResponse();
 	     ResteasyClient client = new ResteasyClientBuilder().build();
-	     ResteasyWebTarget target = client.target(ENDPOINT_FRONTLINESMS);
-	     request.setApiKey(API_KEY_FRONTLINESMS);
+	     ResteasyWebTarget target = client.target(configsSms.getEndpoint());
+	     request.setApiKey(configsSms.getApiKey());
 	     Response response = target.request().post(Entity.entity(request, "application/json"));
 	     String jsonValue = response.readEntity(String.class);
 	     Gson gson = new Gson();
