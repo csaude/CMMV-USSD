@@ -124,22 +124,3 @@
 	
 	
  
- 
-	select * from menu;
-	select * from current_state;
-	select * from operation_metadata; 
-	select * from session_data;
-	 
-	delete from current_state;
-	delete from operation_metadata;
-	
-	--update current_state set location = 'OPERACOES';  
-	
-	
-	
--- drop table operation_metadata;
- --drop table menu;
-  --drop table current_state;
-	--  drop table session_data;
-
- 
