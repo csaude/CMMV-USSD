@@ -67,7 +67,7 @@ public class RegisterMenuHandler implements MenuHandler {
 		   if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_REGISTER_CONFIRMATION_CODE)) {
 
 			 if (ussdRequest.getText().equalsIgnoreCase("1")) {
-			       
+																																																																																																																																																																																																																																																																																																																																																																																																																																																				       
 				  UtenteRegisterResponse response = RestClient.getInstance().registerUtente(utenteRequest);
 			        if ((response.getStatusCode() != 200 && response.getStatusCode() != 201) || response.getSystemNumber() == null) {
 				      MenuUtils.resetSession(currentState, menuService);
