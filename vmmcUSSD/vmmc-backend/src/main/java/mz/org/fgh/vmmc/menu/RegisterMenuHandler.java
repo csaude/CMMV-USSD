@@ -67,13 +67,18 @@ public class RegisterMenuHandler implements MenuHandler {
 		   if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_REGISTER_CONFIRMATION_CODE)) {
 
 			 if (ussdRequest.getText().equalsIgnoreCase("1")) {
-			        FrontlineSmsConfig configsSms = frontlineSmsConfigService.findFrontlineSmsConfigByCode(ConstantUtils.FRONTLINE_SMS_CONFIG).get(0);
+			       
 				  UtenteRegisterResponse response = RestClient.getInstance().registerUtente(utenteRequest);
 			        if ((response.getStatusCode() != 200 && response.getStatusCode() != 201) || response.getSystemNumber() == null) {
 				      MenuUtils.resetSession(currentState, menuService);
 				      return ConstantUtils.MESSAGE_REGISTER_ERROR;
 			        } else {
+			        	//Temporario....nao onsguiu enviar o sms com a confirmacao de registo, entao mostra na tela
+			        	 MenuUtils.resetSession(currentState, menuService);
+			       		return  MessageFormat.format( ConstantUtils.MESSAGE_REGISTER_SUCESS_SMS, response.getSystemNumber());
 
+			        	/*try {
+			          FrontlineSmsConfig configsSms = frontlineSmsConfigService.findFrontlineSmsConfigByCode(ConstantUtils.FRONTLINE_SMS_CONFIG).get(0);
 				      String smsBody = MessageFormat.format(ConstantUtils.MESSAGE_REGISTER_PASSWORD_SMS, response.getSystemNumber());
 				      MenuUtils.resetSession(currentState, menuService);
 				      RecipientSms[] recipients = new RecipientSms[1];
@@ -88,6 +93,12 @@ public class RegisterMenuHandler implements MenuHandler {
 							+ ussdRequest.getPhoneNumber(), e);
 				      }
 				      return ConstantUtils.MENU_REGISTER_SUCCESS;
+			       	} catch (Exception e) {
+			       		//nao onsguiu enviar o sms com a confirmacao de registo, entao mostra na tela
+			       		return  MessageFormat.format( "END" +ConstantUtils.MESSAGE_REGISTER_PASSWORD_SMS, response.getSystemNumber());
+			        		
+			        	}
+			        	*/
 
 			        }
 			 } else if (ussdRequest.getText().equalsIgnoreCase("2")) {

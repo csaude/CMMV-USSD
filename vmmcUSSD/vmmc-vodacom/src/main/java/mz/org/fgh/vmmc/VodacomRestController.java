@@ -19,9 +19,15 @@ public class VodacomRestController {
 
 	@PostMapping(path = "vmmcUssd")
 	public String ussdIngress(@RequestParam String sessionId, @RequestParam String serviceCode,
-			@RequestParam String phoneNumber, @RequestParam String text) throws Throwable {
+			@RequestParam String phoneNumber, @RequestParam String text) {
 
-		return service.invokeVmmcUssdService(sessionId, serviceCode, phoneNumber, text);
+		try {
+			return service.invokeVmmcUssdService(sessionId, serviceCode, phoneNumber, text);
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return text;
 	}
 
 }

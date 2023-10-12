@@ -44,7 +44,8 @@ public class ConstantUtils {
        public static final String MESSAGE_REGISTER_VALUE_INVALID = "CON O valor introduzido e invalido. \n {0}";
        public static final String MESSAGE_REGISTER_PASSWORD_SMS = "Bem vindo ao CMMV, O seu codigo de utilizador:{0}. Digite *123# e introduza o seu codigo.";
        public static final String MESSAGE_INFORMATIVE_MESSAGES  = "END Sera enviado SMS para: {0}  com informacao educativa.";
-
+       public static final String MESSAGE_REGISTER_SUCESS_SMS ="END Sucesso. O seu codigo de utilizador e:{0}.";
+       
        // Selected Options
        public static final String TYPE_RECIEPIENT_MOBILE = "mobile";
        public static final String FRONTLINE_SMS_CONFIG = "FRONTLINE_SMS_CONFIG";
