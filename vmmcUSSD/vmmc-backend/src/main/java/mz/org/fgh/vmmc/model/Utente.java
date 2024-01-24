@@ -1,6 +1,7 @@
 package mz.org.fgh.vmmc.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Utente implements Serializable {
 
@@ -18,6 +19,8 @@ public class Utente implements Serializable {
     private String address;
     private String provinceId;
     private String districtId;
+    private List<Appointment> appointments;
+    private Clinic clinic;
 
     public Utente() {
 	super();
@@ -34,6 +37,7 @@ public class Utente implements Serializable {
 	this.age = age;
 	this.provinceId = provinceId;
 	this.districtId = districtId;
+	this.clinic = clinic;
 
     }
 
@@ -120,6 +124,21 @@ public class Utente implements Serializable {
     public void setAddress(String address) {
 	this.address = address;
     }
+    
+    public List<Appointment> getAppointments() {
+		return appointments;
+	}
+    
+    public Clinic getClinic() {
+		return clinic;
+	}
+    public void setClinic(Clinic clinic) {
+		this.clinic = clinic;
+	}
+   
+    public void setAppointments(List<Appointment> appointments) {
+		this.appointments = appointments;
+	}
 
     @Override
     public String toString() {

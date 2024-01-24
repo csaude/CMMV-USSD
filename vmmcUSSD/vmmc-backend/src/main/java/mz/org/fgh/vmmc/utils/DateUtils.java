@@ -42,7 +42,7 @@ public class DateUtils {
 	     StringBuilder sb = new StringBuilder();
 
 	     LocalDate localDateTime = LocalDate.now();
-	     for (int i = 0; i <= 4; i++) {
+	     for (int i = 0; i <= 3; i++) {
 		   Month month = localDateTime.plusMonths(i).getMonth();
 		   String output = month.getDisplayName(TextStyle.FULL, new Locale("pt"));
 		   sb.append(month.getValue()).append(". ").append(output).append("\n");
@@ -57,7 +57,7 @@ public class DateUtils {
 
        public static boolean isValidDate(int day, int month) {
 	     try {
-		   if (month >= LocalDate.now().getMonthValue() && month <= LocalDate.now().getMonthValue() + 4) {
+		   if (month >= LocalDate.now().getMonthValue() && month <= LocalDate.now().getMonthValue() + 3) {
 			 DateUtils.formatDateByMonthAndDay(day, month);
 			 return true;
 		   }

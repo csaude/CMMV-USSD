@@ -11,6 +11,16 @@ public class ConstantUtils {
        public static final String MENU_CELLNUMBER_FROM_SESSION_CODE = "M014";
        public static final String MENU_AUTHENTICATION_CODE = "M034";
        public static final String MENU_CLINICS_LIST_APPOINTMENT_CODE = "M043";
+       public static final String MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE = "M069";
+       public static final String MENU_PROVINCES_RESCHEDULE_CODE = "M086";
+       public static final String MENU_DISTRICTS_RESCHEDULE_CODE = "M088";
+       public static final String MENU_APPOINTMENT_RESCHEDULE_MONTH = "M073";
+       public static final String MENU_APPOINTMENT_CONFIRMATION_RESCHEDULE_CODE = "M075";
+       public static final String MENU_PROVINCES_US_LIST_CODE = "M092";
+       public static final String MENU_DISTRICTS_US_LIST_CODE = "M094";
+       
+       
+       
        public static final String MENU_APPOINTMENT_CONFIRMATION_CODE = "M050";
        public static final String MENU_CLINICS_LIST_CODE = "M056";
        public static final String MENU_APPOINTMENT_DETAILS_CODE = "M054";
@@ -20,9 +30,14 @@ public class ConstantUtils {
        public static final String MENU_APPOINTMENT_DAY = "M046";
        public static final String MENU_CONFIRMATION_SMS_CLINICS_LIST_CODE = "M059";
        public static final String MENU_INFORMATIVE_MESSAGES = "M062";
+       public static final String MENU_CLINICS_LIST_APPOINTMENT_ON_REGISTRATION_CODE = "M079";
+       public static final String MENU_APPOINTMENT_ON_REGISTRATION_MONTH = "M083";
+       public static final String MENU_APPOINTMENT_ON_REGISTRATION_DAY = "M081";
+       
+       
        
        // mensagens menus
-       public static final String MENU_PRINCIPAL_DESCRIPTION = "CON Bem Vindo ao CMMV \n  1. Entrar \n  2. Registar-se";
+       public static final String MENU_PRINCIPAL_DESCRIPTION = "CON Bem Vindo ao CMMV \n  1. Entrar \n  2. Marcar Consulta";
        public static final String MENU_SESSION_RECOVER_DESCRIPTION = "CON Voltar para o passo anterior? \n  1. Sim \n  2. Nao";
        public static final String MENU_REGISTER_SUCCESS = "END O seu cadastro foi feito com sucesso \n Sera enviado um SMS com o codigo de acesso a sua conta.";
        public static final String MESSAGE_SEND_SMS_CLINIC_LIST = "END Sera enviado SMS com a lista de unidades sanidarias do seu distrito";
@@ -38,13 +53,14 @@ public class ConstantUtils {
        public static final String MESSAGE_REGISTER_ERROR = "END Ocorreu erro ao efectuar o registo.";
        public static final String MESSAGE_LOGIN_FAILED = "CON Codigo de utilizador invalido. \n {0} ";
        public static final String MESSAGE_APPOINTMENT_FAILED = "END Ocorreu erro ao marcar consulta.";
-       public static final String MESSAGE_APPOINTMENT_DETAILS = "\n Data da Consulta:  {0}  \n Unidade Sanitaria: {1} \n Estado da Consulta: {2}";
+       public static final String MESSAGE_APPOINTMENT_DETAILS = "\n Data da Consulta:  {0}  \n Unidade Sanitaria: {1} \n Estado da Consulta: {2} ";
        public static final String MESSAGE_APPOINTMENT_DAY_INVALID = "CON O dia introduzido e invalido \n {0}.";
        public static final String MESSAGE_REGISTER_AGE_INVALID = "CON Idade invalida, A sua idade deve ser igual ou superior a 14 anos. \n {0}";
        public static final String MESSAGE_REGISTER_VALUE_INVALID = "CON O valor introduzido e invalido. \n {0}";
        public static final String MESSAGE_REGISTER_PASSWORD_SMS = "Bem vindo ao CMMV, O seu codigo de utilizador:{0}. Digite *123# e introduza o seu codigo.";
        public static final String MESSAGE_INFORMATIVE_MESSAGES  = "END Sera enviado SMS para: {0}  com informacao educativa.";
        public static final String MESSAGE_REGISTER_SUCESS_SMS ="END Sucesso. O seu codigo de utilizador e:{0}.";
+       public static final String MESSAGE_UPDATE_APPOINTMENT_ERROR ="END Opcao invalida. Nao e possivel alterar dados de consulta ja confirmada.";
        
        // Selected Options
        public static final String TYPE_RECIEPIENT_MOBILE = "mobile";

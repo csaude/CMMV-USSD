@@ -61,6 +61,7 @@ public class VmmcService {
 			 case "2":
 			        return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService,
 					    sessionDataService, infoMessageService, frontlineSmsConfigService);
+			        
 			 default:
 			        return ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR;
 			 }
@@ -74,6 +75,12 @@ public class VmmcService {
 			 case "2":
 			        currentState.setLocation(LocationType.MENU_CADASTRO.getCode());
 			        break;
+			 case "3":
+			        currentState.setLocation(LocationType.MENU_OPERACOES.getCode());       
+			        break;
+			 case "4":
+			        currentState.setLocation(LocationType.MENU_OPERACOES.getCode());       
+			        break;       
 			 case "":
 			        currentState.setLocation(LocationType.MENU_PRINCIPAL.getCode());
 			        break;

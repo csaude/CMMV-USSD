@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -19,10 +20,15 @@ import mz.org.fgh.vmmc.inout.AppointmentRequest;
 import mz.org.fgh.vmmc.inout.UssdRequest;
 import mz.org.fgh.vmmc.inout.UtenteRegisterRequest;
 import mz.org.fgh.vmmc.model.Address;
+import mz.org.fgh.vmmc.model.Appointment;
+import mz.org.fgh.vmmc.model.Clinic;
 import mz.org.fgh.vmmc.model.CurrentState;
 import mz.org.fgh.vmmc.model.District;
+import mz.org.fgh.vmmc.model.Menu;
 import mz.org.fgh.vmmc.model.OperationMetadata;
+import mz.org.fgh.vmmc.model.SessionData;
 import mz.org.fgh.vmmc.repository.OperationMetadataRepository;
+import mz.org.fgh.vmmc.utils.ConstantUtils;
 import mz.org.fgh.vmmc.utils.DateUtils;
 
 @Service
@@ -30,6 +36,9 @@ public class OperationMetadataService {
 
        @Autowired
        OperationMetadataRepository operationMetadataRepository;
+       
+       @Autowired
+       SessionDataService sessionDataService;
 
        public OperationMetadata saveOperationMetadata(OperationMetadata operationMetadata) {
 	     OperationMetadata metadata = operationMetadataRepository.findByCurrentStateIdAndMenuIdAndOperationType(operationMetadata.getCurrentState().getId(),
@@ -71,7 +80,7 @@ public class OperationMetadataService {
 
 	     Address[] addresses = new Address[1];
 	     Address address = new Address();
-	     address.setResidence(metadatas.get("address").getAttrValue());
+	     address.setResidence("N/A");
 	     address.setDistrict(district);
 	     address.setLatitude("0");
 	     address.setLongitude("0");
@@ -81,32 +90,101 @@ public class OperationMetadataService {
 	     request.setCellNumber(metadatas.get("cellNumber") == null ? StringUtils.remove(ussdRequest.getPhoneNumber(), "+258")
 			 : StringUtils.remove(metadatas.get("cellNumber").getAttrValue(), "+258"));
 	     request.setWhatsappNumber(request.getCellNumber());
-	     request.setHaspartner(metadatas.get("hasPartner").getAttrValue().equals("1") ? true : false);
+	   //  request.setHaspartner(metadatas.get("hasPartner").getAttrValue().equals("1") ? true : false);
 	     request.setAge(metadatas.get("age").getAttrValue());
+	     
+	     Appointment appointment = new Appointment();   
+	     
+	      
+	     int appointmentDay = Integer.parseInt(metadatas.get("dayRegister").getAttrValue());
+	     int appointmentMonth = Integer.parseInt(metadatas.get("monthRegister").getAttrValue());
+	     String appointmentDate = DateUtils.formatDateByMonthAndDay(appointmentDay, appointmentMonth);
+	     
+	     appointment.setAppointmentDate(operationType);
+	     appointment.setAppointmentDate(appointmentDate);
+	     appointment.setOrderNumer(1);
+	     appointment.setStatus(AppointmentStatus.APPOINTMENT_PENDING.getCode());
+	     appointment.setTime("0:0"); // TODO: Rever
+	     appointment.setHasHappened(false);
+	     
+	     Clinic clinic = new Clinic();
+	     clinic.setId(Long.parseLong(sessionDataService
+					.findByCurrentStateIdAndAttrName(currentState.getId(), "clinicId").getAttrValue()));
+	     appointment.setClinic(clinic);
+	     
+	     
+	     List<Appointment> appointments = new ArrayList<>();
+	     appointments.add(appointment);
+	     request.setAppointments(appointments);
+	     
+	     
 	     return request;
 
        }
 
-       public AppointmentRequest createAppointmentRequestByMetadatas(UssdRequest ussdRequest, String operationType, CurrentState currentState) {
+       public AppointmentRequest createAppointmentRequestByMetadatas(UssdRequest ussdRequest, String operationType, CurrentState currentState, Menu menu) {
 
 	     Map<String, OperationMetadata> metadatas = getMetadatasByOperationTypeAndSessionId(currentState.getId(), operationType);
 
-	     int appointmentDay = Integer.parseInt(metadatas.get("appointmentDay").getAttrValue());
-	     int appointmentMonth = Integer.parseInt(metadatas.get("appointmentMonth").getAttrValue());
-
-	     String appointmentDate = DateUtils.formatDateByMonthAndDay(appointmentDay, appointmentMonth);
-
+	     int appointmentDay = Integer.parseInt(metadatas.get(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_CODE.equalsIgnoreCase(menu.getCode())? "appointmentDay":"dayReschedule").getAttrValue());
+	     int appointmentMonth = Integer.parseInt(metadatas.get(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_CODE.equalsIgnoreCase(menu.getCode())? "appointmentMonth":"monthReschedule" ).getAttrValue());
+	     
+	     long clinicId = Long.parseLong(sessionDataService
+					.findByCurrentStateIdAndAttrName(currentState.getId(), "clinicId").getAttrValue());
+	     
+	     if (ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_RESCHEDULE_CODE.equalsIgnoreCase(menu.getCode())) {
+	    	 clinicId = Integer.parseInt(metadatas.get("clinicReschedule").getAttrValue());
+	     }
+	     Long appointmentId =Long.parseLong(sessionDataService
+		.findByCurrentStateIdAndAttrName(currentState.getId(), "appointmentId").getAttrValue());
+		  String appointmentDate = DateUtils.formatDateByMonthAndDay(appointmentDay, appointmentMonth);
 	     AppointmentRequest request = new AppointmentRequest();
-
 	     request.setAppointmentDate(appointmentDate);
 	     request.setOrderNumer(1);
 	     request.setStatus(AppointmentStatus.APPOINTMENT_PENDING.getCode());
 	     request.setTime("0:0"); // TODO: Rever
 	     request.setHasHappened(false);
+	     request.setId(appointmentId);
+	     request.setClinic(clinicId);
 	     return request;
 
        }
 
+       
+       public AppointmentRequest createAppointmentRequestByMetadatasOnRegistration(UssdRequest ussdRequest, String operationType, CurrentState currentState) {
+
+  	     Map<String, OperationMetadata> metadatas = getMetadatasByOperationTypeAndSessionId(currentState.getId(), operationType);
+
+  	     int appointmentDay = Integer.parseInt(metadatas.get("dayRegister").getAttrValue());
+  	     int appointmentMonth = Integer.parseInt(metadatas.get("monthRegister").getAttrValue());
+
+  	     String appointmentDate = DateUtils.formatDateByMonthAndDay(appointmentDay, appointmentMonth);
+
+  	     AppointmentRequest request = new AppointmentRequest();
+
+  	     request.setAppointmentDate(appointmentDate);
+  	     request.setOrderNumer(1);
+  	     request.setStatus(AppointmentStatus.APPOINTMENT_PENDING.getCode());
+  	     request.setTime("0:0"); // TODO: Rever
+  	     request.setHasHappened(false);
+  	     return request;
+
+         }
+       
+       public String getAppointmentConfirmationDataOnRegistration( UtenteRegisterRequest utenteRequest, CurrentState currentState) {
+    	     // TODO: acrescentar outros dados
+    	   
+    	   SessionData sessionData = sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "clinicName");
+    	    Appointment appointment =  utenteRequest.getAppointments().get(0);
+    	     
+
+    	     String appointmentDate = DateUtils.getSimpleDateFormat(appointment != null ? appointment.getAppointmentDate(): " ");
+    	     StringBuilder sb = new StringBuilder();
+    	     return sb.append("\n Nome:").append(utenteRequest.getFirstNames()).append(" ").append(utenteRequest.getLastNames()).append("\n Idade:").append(utenteRequest.getAge()).append("\n Data:").append(appointmentDate).append("\n Unidade Sanitaria: ").append(sessionData.getAttrValue()).toString();
+
+           }
+       
+       
        public String getAppointmentConfirmationData(AppointmentRequest data) {
 	     // TODO: acrescentar outros dados
 
@@ -116,12 +194,14 @@ public class OperationMetadataService {
 
        }
 
+       
+
+
        public String getRegisterConfirmationData(UtenteRegisterRequest data) {
 
 	     StringBuilder sb = new StringBuilder();
 	     return sb.append("\n Nome:").append(data.getFirstNames()).append(" ").append(data.getLastNames()).append("\n Idade:").append(data.getAge()).append("\n Telefone:")
-			 .append(data.getCellNumber()).append("\n Endereco:").append(data.getAddresses()[0].getResidence()).append("\n Tem parceiro:")
-			 .append(data.getHaspartner() ? "Sim" : "Nao").toString();
+			 .append(data.getCellNumber()).toString();
        }
 
        /*

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import mz.org.fgh.vmmc.controller.VmmcService;
+import mz.org.fgh.vmmc.utils.ConstantUtils;
 
 @SpringBootApplication(scanBasePackages = "mz.org.fgh")
 @RestController
@@ -26,8 +27,10 @@ public class VodacomRestController {
 		} catch (Throwable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			//return ConstantUtils.MESSAGE_UNEXPECTED_ERROR;
+			 
 		}
-		return text;
+		return ConstantUtils.MESSAGE_UNEXPECTED_ERROR;
 	}
 
 }

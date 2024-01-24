@@ -8,7 +8,6 @@ import mz.org.fgh.vmmc.model.Clinic;
 
 public class UtenteSearchResponse extends GenericResponse {
        private long id;
-       private long clinicId;
        private String firstNames;
        private String lastNames;
        private String status;
@@ -30,14 +29,7 @@ public class UtenteSearchResponse extends GenericResponse {
 	     this.id = id;
        }
 
-       public Long getClinicId() {
-	     return clinicId;
-       }
-
-       public void setClinicId(long clinicId) {
-	     this.clinicId = clinicId;
-       }
-
+   
        public String getFirstNames() {
 	     return firstNames;
        }

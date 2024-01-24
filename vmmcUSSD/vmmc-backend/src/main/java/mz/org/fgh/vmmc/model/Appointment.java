@@ -4,12 +4,14 @@ public class Appointment {
 
     private Long id;
 
-    private Long clinicId;
+    private Clinic clinic;
     private String appointmentDate;
     private String time;
     private long orderNumer;
     private boolean hasHappened;
     private String visitDate;
+    private String status;
+    
 
     public Appointment() {
 	super();
@@ -23,12 +25,12 @@ public class Appointment {
 	this.id = id;
     }
 
-    public Long getClinicId() {
-	return clinicId;
+    public Clinic getClinic() {
+	return clinic;
     }
 
-    public void setClinicId(Long clinicId) {
-	this.clinicId = clinicId;
+    public void setClinic(Clinic clinicId) {
+	this.clinic = clinicId;
     }
 
     public String getAppointmentDate() {
@@ -70,5 +72,13 @@ public class Appointment {
     public void setVisitDate(String visitDate) {
 	this.visitDate = visitDate;
     }
+    
+    public String getStatus() {
+		return status;
+	}
+    
+    public void setStatus(String status) {
+		this.status = status;
+	}
 
 }

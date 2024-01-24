@@ -102,7 +102,7 @@ public class RestClient {
 
        }
 
-       public AppointmentResponse makeAppointment(@RequestBody AppointmentRequest request) throws Throwable {
+       public AppointmentResponse updateAppointment(@RequestBody AppointmentRequest request) throws Throwable {
 	     AppointmentResponse responseReg = new AppointmentResponse();
 	     String token = RestClient.getInstance().login();
 	     ResteasyClient client = new ResteasyClientBuilder().build();

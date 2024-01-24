@@ -47,9 +47,11 @@ public class SessionDataService {
        public void saveSessionData(UtenteSearchResponse response, long currentStateId) {
 	     Address address = response.getAddresses().get(0);
 	     SessionData utenteIdSd = new SessionData(currentStateId, "utenteId", String.valueOf(response.getId()));
+	     SessionData appointmentId = new SessionData(currentStateId,"appointmentId", String.valueOf(response.getAppointments().get(0).getId()));
 	     SessionData districtIdSd = new SessionData(currentStateId, "districtId", String.valueOf(address != null ? address.getDistrict().getId() : ""));
 	     saveSessionData(utenteIdSd);
 	     saveSessionData(districtIdSd);
+	     saveSessionData(appointmentId);
        }
 
        public void saveClinicOnSessionData(Clinic clinic, long currentStateId) {

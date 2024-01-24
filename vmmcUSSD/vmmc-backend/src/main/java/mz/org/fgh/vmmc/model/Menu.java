@@ -1,12 +1,13 @@
 package mz.org.fgh.vmmc.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "Menu")
-public class Menu {
+public class Menu implements Comparable<Menu> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +34,10 @@ public class Menu {
     @ManyToOne
     @JoinColumn(name = "parent_menu_id")
     private Menu parentMenu;
+    
+    @Column(name = "orderMenu")
+    private Integer orderMenu;
+    
 
     public Menu() {
     }
@@ -81,7 +86,8 @@ public class Menu {
     }
 
     public List<Menu> getMenuItems() {
-	return menuItems;
+	  Collections.sort(this.menuItems); 
+	  return this.menuItems;
     }
 
     public void setMenuItems(List<Menu> menuItems) {
@@ -111,5 +117,11 @@ public class Menu {
     public void setOption(String option) {
 	this.option = option;
     }
+    
+    @Override
+    public int compareTo(Menu otherMenu) {
+        return Integer.compare(this.orderMenu, otherMenu.orderMenu);
+    }
+
 
 }

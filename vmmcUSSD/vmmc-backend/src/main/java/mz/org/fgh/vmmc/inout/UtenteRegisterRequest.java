@@ -1,8 +1,10 @@
 package mz.org.fgh.vmmc.inout;
 
 import java.io.Serializable;
+import java.util.List;
 
 import mz.org.fgh.vmmc.model.Address;
+import mz.org.fgh.vmmc.model.Appointment;
 
 public class UtenteRegisterRequest implements Serializable {
        /**
@@ -23,6 +25,7 @@ public class UtenteRegisterRequest implements Serializable {
        private String status;
        private Address[] addresses;
        private String registerDate;
+       private List<Appointment> appointments;
 
        public String getFirstNames() {
 	     return firstNames;
@@ -135,5 +138,12 @@ public class UtenteRegisterRequest implements Serializable {
        public void setRegisterDate(String registerDate) {
 	     this.registerDate = registerDate;
        }
+       
+       public List<Appointment> getAppointments() {
+		return appointments;
+	}
+       public void setAppointments(List<Appointment> appointments) {
+		this.appointments = appointments;
+	}
 
 }
