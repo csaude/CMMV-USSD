@@ -25,7 +25,6 @@ import mz.org.fgh.vmmc.inout.UtenteSearchResponse;
 import mz.org.fgh.vmmc.model.Clinic;
 import mz.org.fgh.vmmc.model.CurrentState;
 import mz.org.fgh.vmmc.model.District;
-import mz.org.fgh.vmmc.model.FrontlineSmsConfig;
 import mz.org.fgh.vmmc.model.InfoMessage;
 import mz.org.fgh.vmmc.model.Menu;
 import mz.org.fgh.vmmc.model.OperationMetadata;
