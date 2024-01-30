@@ -14,6 +14,7 @@ public class ConstantUtils {
        public static final String MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE = "M069";
        public static final String MENU_PROVINCES_RESCHEDULE_CODE = "M086";
        public static final String MENU_DISTRICTS_RESCHEDULE_CODE = "M088";
+       public static final String MENU_APPOINTMENT_RESCHEDULE_DAY = "M071";
        public static final String MENU_APPOINTMENT_RESCHEDULE_MONTH = "M073";
        public static final String MENU_APPOINTMENT_CONFIRMATION_RESCHEDULE_CODE = "M075";
        public static final String MENU_PROVINCES_US_LIST_CODE = "M092";
