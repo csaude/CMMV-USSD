@@ -3,8 +3,8 @@ package mz.org.fgh.vmmc.controller;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,7 @@ import mz.org.fgh.vmmc.utils.MessageUtils;
 
 @Service
 public class VmmcService {
-
+ 
        Logger logger = Logger.getLogger(VmmcService.class.getName());
        private static HashMap<String, MenuHandler> menuTypes = MenuHandlerType.getMenuHandlerTypes();
 
@@ -43,73 +43,72 @@ public class VmmcService {
        FrontlineSmsConfigService frontlineSmsConfigService;
 
        public String invokeVmmcUssdService(String sessionId, String serviceCode, String phoneNumber, String text) throws Throwable {
+    	    UssdRequest ussdRequest = new UssdRequest(sessionId, serviceCode, phoneNumber, MessageUtils.formatInputText(text));
+    	    long sessionRecoverTime = getSessionRecoverTime();
 
-	     UssdRequest ussdRequest = new UssdRequest(sessionId, serviceCode, phoneNumber, MessageUtils.formatInputText(text));
-	     long sessionRecoverTime = Long.parseLong(System.getProperty("sessionRecoverTime", "30"));
+    	    CurrentState currentState = menuService.findCurrentStateByPhoneNumber(phoneNumber, true);
 
-	     CurrentState currentState = menuService.findCurrentStateByPhoneNumber(phoneNumber, true);
+    	    if (currentState == null) {
+    	        return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService,
+    	                sessionDataService, infoMessageService, frontlineSmsConfigService);
+    	    }
 
-	     if (currentState != null) {
-		   long seconds = Duration.between(currentState.getCreatedDate(), LocalDateTime.now()).getSeconds();
-		   if (isSessionExpired(ussdRequest, sessionRecoverTime, currentState, seconds)) {
+    	    long seconds = Duration.between(currentState.getCreatedDate(), LocalDateTime.now()).getSeconds();
+    	    if (isSessionExpired(ussdRequest, sessionRecoverTime, currentState, seconds)) {
+    	        return handleExpiredSession(ussdRequest, currentState);
+    	    } else {
+    	        return handleCurrentState(ussdRequest, currentState);
+    	    }
+    	}
+       
+       private String handleCurrentState(UssdRequest ussdRequest, CurrentState currentState) throws Throwable {
+    	    if (currentState.getLocation().equalsIgnoreCase(LocationType.MENU_PRINCIPAL.getCode())) {
+    	        switch (ussdRequest.getText()) {
+    	            case "1":
+    	                currentState.setLocation(LocationType.MENU_OPERACOES.getCode());
+    	                break;
+    	            case "2":
+    	            case "3":
+    	            case "4":
+    	                currentState.setLocation(LocationType.MENU_CADASTRO.getCode());
+    	                break;
+    	            case "":
+    	                currentState.setLocation(LocationType.MENU_PRINCIPAL.getCode());
+    	                break;
+    	            default:
+    	                return ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR;
+    	        }
+    	        return menuTypes.get(currentState.getLocation()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService, sessionDataService,
+    	                infoMessageService, frontlineSmsConfigService);
+    	    } else {
+    	        return menuTypes.get(currentState.getLocation()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService, sessionDataService,
+    	                infoMessageService, frontlineSmsConfigService);
+    	    }
+    	}
+ 
+       
+       private String handleExpiredSession(UssdRequest ussdRequest, CurrentState currentState) throws Throwable {
+    	    switch (ussdRequest.getText()) {
+    	        case "":
+    	            return ConstantUtils.MENU_SESSION_RECOVER_DESCRIPTION;
+    	        case "1":
+    	            return menuTypes.get(currentState.getLocation()).recoverSession(ussdRequest, currentState, menuService, sessionDataService);
+    	        case "2":
+    	            return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService,
+    	                    sessionDataService, infoMessageService, frontlineSmsConfigService);
+    	        default:
+    	            return ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR;
+    	    }
+    	}
 
-			 switch (ussdRequest.getText()) {
-			 case "":
-			        return ConstantUtils.MENU_SESSION_RECOVER_DESCRIPTION;
-			 case "1":
-			        return menuTypes.get(currentState.getLocation()).recoverSession(ussdRequest, currentState, menuService, sessionDataService);
-			 case "2":
-			        return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService,
-					    sessionDataService, infoMessageService, frontlineSmsConfigService);
-			        
-			 default:
-			        return ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR;
-			 }
 
-		   } else if (currentState.getLocation().equalsIgnoreCase(LocationType.MENU_PRINCIPAL.getCode())) {
-			 switch (ussdRequest.getText()) {
-
-			 case "1":
-			        currentState.setLocation(LocationType.MENU_OPERACOES.getCode());
-			        break;
-			 case "2":
-			        currentState.setLocation(LocationType.MENU_CADASTRO.getCode());
-			        break;
-			 case "3":
-			        currentState.setLocation(LocationType.MENU_OPERACOES.getCode());       
-			        break;
-			 case "4":
-			        currentState.setLocation(LocationType.MENU_OPERACOES.getCode());       
-			        break;       
-			 case "":
-			        currentState.setLocation(LocationType.MENU_PRINCIPAL.getCode());
-			        break;
-			 default:
-			        return ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR;
-
-			 }
-			 return menuTypes.get(currentState.getLocation()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService, sessionDataService,
-				      infoMessageService, frontlineSmsConfigService);
-		   } else {
-			 return menuTypes.get(currentState.getLocation()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService, sessionDataService,
-				      infoMessageService, frontlineSmsConfigService);
-		   }
-
-	     }
-
-	     else {
-		   return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdRequest, currentState, menuService, operationMetadataService, sessionDataService,
-			        infoMessageService, frontlineSmsConfigService);
-	     }
-
-       }
+    	private long getSessionRecoverTime() {
+    	    return Long.parseLong(System.getProperty("sessionRecoverTime", "30"));
+    	}
 
        private boolean isSessionExpired(UssdRequest ussdRequest, long sessionRecoverTime, CurrentState currentState, long seconds) {
 	     return !currentState.getSessionId().equalsIgnoreCase(ussdRequest.getSessionId()) && seconds > sessionRecoverTime
 			 && !currentState.getLocation().equalsIgnoreCase(LocationType.MENU_PRINCIPAL.getCode());
        }
 
-       public String testService() {
-	     return "Its working just fine cdc";
-       }
 }
