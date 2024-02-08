@@ -41,21 +41,14 @@ public class MainMenuHandler implements MenuHandler {
 		   currentState.setSessionId(ussdRequest.getSessionId());
 		   menuService.saveCurrentState(currentState);
 
-	     }
-	  //   return ConstantUtils.MENU_PRINCIPAL_DESCRIPTION;
-	     
-	     
-    	   
-    	   Menu currentMenu = menuService.getCurrentMenuBySessionId(ussdRequest.getSessionId(), true);
-
-	     
-	    // return ConstantUtils.MENU_PRINCIPAL_DESCRIPTION;
+	     }    
+    	   Menu currentMenu = menuService.getCurrentMenuBySessionId(ussdRequest.getSessionId(), true); 
 	     return getNextMenuText(currentState, currentMenu, menuService);
 	     
        }
 
        @Override
-       public String recoverSession(UssdRequest request, CurrentState currentState, MenuService menuService, SessionDataService sessionDataService) {
+       public String recoverSession(UssdRequest request, CurrentState currentState, MenuService menuService, SessionDataService sessionDataService, OperationMetadataService serviceMeta) {
     	   Menu currentMenu = menuService.getCurrentMenuBySessionId(currentState.getSessionId(), true);
 	     if (currentState != null) {
 		   currentState.setActive(false);

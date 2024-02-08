@@ -49,10 +49,10 @@ public class OperationsMenuHandler implements MenuHandler {
 	private int lastIndex;
 	private int startIndex;
 	private final int pagingSize = 3;
-    private Map<String, Province> mapProvinces;
-    private Map<String, District> mapDistricts;
-    private List<District> districtList;
-    private List<Province> allProvinces;
+	private Map<String, Province> mapProvinces;
+	private Map<String, District> mapDistricts;
+	private List<District> districtList;
+	private List<Province> allProvinces;
 	private static OperationsMenuHandler instance = new OperationsMenuHandler();
 
 	private OperationsMenuHandler() {
@@ -65,15 +65,18 @@ public class OperationsMenuHandler implements MenuHandler {
 	@Override
 	public String handleMenu(UssdRequest ussdRequest, CurrentState currentState, MenuService menuService,
 			OperationMetadataService operationMetadataService, SessionDataService sessionDataService,
-			InfoMessageService infoMessageService, FrontlineSmsConfigService frontlineSmsConfigService) throws Throwable {
+			InfoMessageService infoMessageService, FrontlineSmsConfigService frontlineSmsConfigService)
+			throws Throwable {
 
 		Menu currentMenu = menuService.getCurrentMenuBySessionId(currentState.getSessionId(), true);
 
 		if (currentMenu != null) {
 			// Invoca o servico de consulta
-			if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_CODE) || currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_RESCHEDULE_CODE)  ) {
+			if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_CODE) || currentMenu
+					.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_RESCHEDULE_CODE)) {
 
 				if (ussdRequest.getText().equalsIgnoreCase("1")) {
+
 					AppointmentResponse response = RestClient.getInstance().updateAppointment(appointmentRequest);
 					if ((response.getStatusCode() != 200 && response.getStatusCode() != 201)) {
 						currentState.setIdMenu(1);
@@ -90,57 +93,78 @@ public class OperationsMenuHandler implements MenuHandler {
 					MenuUtils.resetSession(currentState, menuService);
 					return ConstantUtils.MESSAGE_APPOINTMENT_NOT_CONFIRMED;
 
+				} else if (ussdRequest.getText().equalsIgnoreCase("0")) {
+					return navegate(currentMenu, ussdRequest, currentState, menuService, operationMetadataService,
+							sessionDataService, infoMessageService, frontlineSmsConfigService);
+				} else {
+					String appointmentDetails = operationMetadataService
+							.getAppointmentConfirmationData(appointmentRequest);
+					return MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA, StringUtils.remove(
+							MessageFormat.format(MessageUtils.getMenuText(currentMenu), appointmentDetails), "CON"));
+
 				}
 
 			}
 
 			else if (!ussdRequest.getText().equals("0") || ussdRequest.getText().equals("#")) {
 
-				if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_RESCHEDULE_CODE) || currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_US_LIST_CODE)) {
-			        if (mapProvinces.containsKey(ussdRequest.getText())) {
-				      SessionData sd = new SessionData(currentState.getId(), "provinceId", mapProvinces.get(ussdRequest.getText()).getId() + "");
-				      sessionDataService.saveSessionData(sd);
-				      ussdRequest.setText(mapProvinces.get(ussdRequest.getText()).getId() + "");
-			        } else {
-				      return MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA,
-						  StringUtils.remove(MessageFormat.format(MessageUtils.getMenuText(currentMenu), getProvincesMenu()), "CON "));
+				if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_RESCHEDULE_CODE)
+						|| currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_US_LIST_CODE)) {
+					if (mapProvinces.containsKey(ussdRequest.getText())) {
+						SessionData sd = new SessionData(currentState.getId(), "provinceId",
+								mapProvinces.get(ussdRequest.getText()).getId() + "");
+						sessionDataService.saveSessionData(sd);
+						ussdRequest.setText(mapProvinces.get(ussdRequest.getText()).getId() + "");
+					} else {
+						return MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA,
+								StringUtils.remove(
+										MessageFormat.format(MessageUtils.getMenuText(currentMenu), getProvincesMenu()),
+										"CON "));
 
-			        }
-			 } else if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_RESCHEDULE_CODE) || currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_US_LIST_CODE)) {
+					}
+				} else if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_RESCHEDULE_CODE)
+						|| currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_US_LIST_CODE)) {
 
-			        int selectedProvinceId = Integer.parseInt(sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "provinceId").getAttrValue());
-			      
-			        if (ussdRequest.getText().equalsIgnoreCase("#")) {
+					int selectedProvinceId = Integer.parseInt(sessionDataService
+							.findByCurrentStateIdAndAttrName(currentState.getId(), "provinceId").getAttrValue());
 
-				      return MessageFormat.format(MessageUtils.getMenuText(currentMenu),getDistrictsMenu(selectedProvinceId, allProvinces, ussdRequest) );
-			        } else if (mapDistricts.containsKey(ussdRequest.getText())) {
-			        	//ver AQUIIIII
-			        	SessionData sd = new SessionData(currentState.getId(), "districtId", mapDistricts.get(ussdRequest.getText()).getId() + "");
-					      sessionDataService.saveSessionData(sd);
-				      ussdRequest.setText(mapDistricts.get(ussdRequest.getText()).getId() + "");
-				      lastIndex = pagingSize;
-				      startIndex = 0;
+					if (ussdRequest.getText().equalsIgnoreCase("#")) {
 
-			        } else {
-				      return MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA, StringUtils.remove(MessageFormat
-						  .format(MessageUtils.getMenuText(currentMenu), getDistrictsMenu(selectedProvinceId, allProvinces, ussdRequest)), "CON "));
+						return MessageFormat.format(MessageUtils.getMenuText(currentMenu),
+								getDistrictsMenu(selectedProvinceId, allProvinces, ussdRequest));
+					} else if (mapDistricts.containsKey(ussdRequest.getText())) {
+						// ver AQUIIIII
+						SessionData sd = new SessionData(currentState.getId(), "districtId",
+								mapDistricts.get(ussdRequest.getText()).getId() + "");
+						sessionDataService.saveSessionData(sd);
+						ussdRequest.setText(mapDistricts.get(ussdRequest.getText()).getId() + "");
+						lastIndex = pagingSize;
+						startIndex = 0;
 
-			        }
-			 } else	if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_AUTHENTICATION_CODE)) {
+					} else {
+						return MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA,
+								StringUtils.remove(
+										MessageFormat.format(MessageUtils.getMenuText(currentMenu),
+												getDistrictsMenu(selectedProvinceId, allProvinces, ussdRequest)),
+										"CON "));
+
+					}
+				} else if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_AUTHENTICATION_CODE)) {
 					return autenticate(currentMenu, ussdRequest, currentState, menuService, sessionDataService);
 				} else if (ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_CODE.equalsIgnoreCase(currentMenu.getCode())
 						|| ConstantUtils.MENU_CLINICS_LIST_CODE.equalsIgnoreCase(currentMenu.getCode())
-						|| ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE.equalsIgnoreCase(currentMenu.getCode())
-						) {
-				    if (ussdRequest.getText().equalsIgnoreCase("#")) { 
-				    	 return getClinicsByDistrictMenu(ussdRequest, currentState, sessionDataService, currentMenu);
-				    	
-				    } else	if("00".equalsIgnoreCase(ussdRequest.getText()) && ConstantUtils.MENU_CLINICS_LIST_CODE.equalsIgnoreCase(currentMenu.getCode())) {
-						
+						|| ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE
+								.equalsIgnoreCase(currentMenu.getCode())) {
+					if (ussdRequest.getText().equalsIgnoreCase("#")) {
+						return getClinicsByDistrictMenu(ussdRequest, currentState, sessionDataService, currentMenu);
+
+					} else if ("00".equalsIgnoreCase(ussdRequest.getText())
+							&& ConstantUtils.MENU_CLINICS_LIST_CODE.equalsIgnoreCase(currentMenu.getCode())) {
+
 						return navegate(currentMenu, ussdRequest, currentState, menuService, operationMetadataService,
-								sessionDataService, infoMessageService,frontlineSmsConfigService);
-						
-					} else	if (mapClinics.containsKey(ussdRequest.getText())) {
+								sessionDataService, infoMessageService, frontlineSmsConfigService);
+
+					} else if (mapClinics.containsKey(ussdRequest.getText())) {
 						// Seta o ID da clinica correspondente a opcao escolhida
 						Clinic clinica = mapClinics.get(ussdRequest.getText());
 						sessionDataService.saveClinicOnSessionData(clinica, currentState.getId());
@@ -156,8 +180,9 @@ public class OperationsMenuHandler implements MenuHandler {
 				} else if (ussdRequest.getText().equalsIgnoreCase("1")
 						&& ConstantUtils.MENU_CONFIRMATION_SMS_CLINICS_LIST_CODE
 								.equalsIgnoreCase(currentMenu.getCode())) {
-				 //      FrontlineSmsConfig configsSms = frontlineSmsConfigService.findFrontlineSmsConfigByCode(ConstantUtils.FRONTLINE_SMS_CONFIG).get(0);
-					
+					// FrontlineSmsConfig configsSms =
+					// frontlineSmsConfigService.findFrontlineSmsConfigByCode(ConstantUtils.FRONTLINE_SMS_CONFIG).get(0);
+
 					long districtId = Long.parseLong(sessionDataService
 							.findByCurrentStateIdAndAttrName(currentState.getId(), "districtId").getAttrValue());
 					List<Clinic> clinics = RestClient.getInstance().getClinicsByDistrict(districtId).getClinics()
@@ -171,72 +196,63 @@ public class OperationsMenuHandler implements MenuHandler {
 					PayloadSms payload = new PayloadSms(getClinicsForSms(clinics), recipients);
 					SendSmsRequest smsRequest = new SendSmsRequest();
 					smsRequest.setPayload(payload);
-					//RestClient.getInstance().sendSms(smsRequest,configsSms);
+					// RestClient.getInstance().sendSms(smsRequest,configsSms);
 
 					return ConstantUtils.MESSAGE_SEND_SMS_CLINIC_LIST;
 
-				} else if (ConstantUtils.MENU_APPOINTMENT_MONTH.equalsIgnoreCase(currentMenu.getCode()) || ConstantUtils.MENU_APPOINTMENT_RESCHEDULE_MONTH.equalsIgnoreCase(currentMenu.getCode()) ) {
-					
-				//	String keyDay = ConstantUtils.MENU_APPOINTMENT_MONTH.equalsIgnoreCase(currentMenu.getCode()) ? "appointmentDay": "dayReschedule";
-				//  String keyMonth = ConstantUtils.MENU_APPOINTMENT_MONTH.equalsIgnoreCase(currentMenu.getCode()) ? "appointmentMonth": "monthReschedule";
-					
-					
-					/*int day = Integer.parseInt(operationMetadataService
+				} else if (ConstantUtils.MENU_APPOINTMENT_MONTH.equalsIgnoreCase(currentMenu.getCode())
+						|| ConstantUtils.MENU_APPOINTMENT_RESCHEDULE_MONTH.equalsIgnoreCase(currentMenu.getCode())) {
+
+					String month = ussdRequest.getText();
+					if (!DateUtils.isValidMonth(month)) {
+						return MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA,
+								StringUtils.remove(MessageFormat.format(MessageUtils.getMenuText(currentMenu),
+										DateUtils.getAppointmentsMonth()), "CON"));
+					}
+
+				} else if (ConstantUtils.MENU_APPOINTMENT_ON_REGISTRATION_MONTH
+						.equalsIgnoreCase(currentMenu.getCode())) {
+
+					String month = ussdRequest.getText();
+					if (!DateUtils.isValidMonth(month)) {
+						return MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA,
+								StringUtils.remove(MessageFormat.format(MessageUtils.getMenuText(currentMenu),
+										DateUtils.getAppointmentsMonth()), "CON"));
+					}
+
+				} else if (ConstantUtils.MENU_APPOINTMENT_DAY.equalsIgnoreCase(currentMenu.getCode())
+						|| ConstantUtils.MENU_APPOINTMENT_RESCHEDULE_DAY.equalsIgnoreCase(currentMenu.getCode())) {
+
+					String keyMonth = ConstantUtils.MENU_APPOINTMENT_DAY.equalsIgnoreCase(currentMenu.getCode())
+							? "appointmentMonth"
+							: "monthReschedule";
+
+					String month = operationMetadataService
 							.getMetadatasByOperationTypeAndSessionId(currentState.getId(), currentState.getLocation())
-							.get(keyDay).getAttrValue());
-					int month = StringUtils.isNotBlank(ussdRequest.getText()) ? Integer.parseInt(ussdRequest.getText())
-							: Integer
-									.parseInt(
-											operationMetadataService
-													.getMetadatasByOperationTypeAndSessionId(currentState.getId(),
-															currentState.getLocation())
-													.get(keyMonth).getAttrValue()); */
-				
-					String month = ussdRequest.getText();
-					if (!DateUtils.isValidMonth(month)) {
-						return MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA,
-								StringUtils.remove(MessageFormat.format(MessageUtils.getMenuText(currentMenu),
-										DateUtils.getAppointmentsMonth()), "CON"));
-					}
+							.get(keyMonth).getAttrValue();
 
-				} 
-				else if (ConstantUtils.MENU_APPOINTMENT_ON_REGISTRATION_MONTH.equalsIgnoreCase(currentMenu.getCode())) {
-
-					String month = ussdRequest.getText();
-					if (!DateUtils.isValidMonth(month)) {
-						return MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA,
-								StringUtils.remove(MessageFormat.format(MessageUtils.getMenuText(currentMenu),
-										DateUtils.getAppointmentsMonth()), "CON"));
-					}
-
-				}else if (ConstantUtils.MENU_APPOINTMENT_DAY.equalsIgnoreCase(currentMenu.getCode()) || ConstantUtils.MENU_APPOINTMENT_RESCHEDULE_DAY.equalsIgnoreCase(currentMenu.getCode())) {
-
-					  String keyMonth = ConstantUtils.MENU_APPOINTMENT_DAY.equalsIgnoreCase(currentMenu.getCode()) ? "appointmentMonth": "monthReschedule";
-						
-					String month =operationMetadataService
-							 .getMetadatasByOperationTypeAndSessionId(currentState.getId(),
-							  currentState.getLocation()) .get(keyMonth).getAttrValue();
-					
-					
 					if (!DateUtils.isValidDay(ussdRequest.getText(), month)) {
 						return MessageFormat.format(ConstantUtils.MESSAGE_APPOINTMENT_DAY_INVALID,
 								StringUtils.remove(MessageUtils.getMenuText(currentMenu), "CON "));
 					}
-					 
+
 				} else if (ConstantUtils.MENU_APPOINTMENT_DETAILS_CODE.equalsIgnoreCase(currentMenu.getCode())) {
-					
-					
+
 					if ((ussdRequest.getText().equalsIgnoreCase("1") || ussdRequest.getText().equalsIgnoreCase("2"))) {
-						String utenteId = sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "utenteId")
-								.getAttrValue();
-						
-						AppointmentSearchResponse appointment = RestClient.getInstance().getAppointmentByUtenteId(utenteId);
+						String utenteId = sessionDataService
+								.findByCurrentStateIdAndAttrName(currentState.getId(), "utenteId").getAttrValue();
+						AppointmentSearchResponse appointment = RestClient.getInstance()
+								.getAppointmentByUtenteId(utenteId);
 						if (appointment.getStatus().equalsIgnoreCase("CONFIRMADO")) {
 							MenuUtils.resetSession(currentState, menuService);
 							return MessageFormat.format(ConstantUtils.MESSAGE_UPDATE_APPOINTMENT_ERROR,
 									StringUtils.remove(MessageUtils.getMenuText(currentMenu), "CON "));
-						} 
-					}  
+						}
+					} else {
+						return MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA, StringUtils.remove(
+								getAppointmentDetails(currentState, menuService, sessionDataService, currentMenu),
+								"CON "));
+					}
 				}
 
 				else if (!MessageUtils.isValidOption(currentMenu, ussdRequest.getText())) {
@@ -257,9 +273,11 @@ public class OperationsMenuHandler implements MenuHandler {
 			}
 
 			return navegate(currentMenu, ussdRequest, currentState, menuService, operationMetadataService,
-					sessionDataService, infoMessageService,frontlineSmsConfigService);
+					sessionDataService, infoMessageService, frontlineSmsConfigService);
 
-		} else {
+		} else
+
+		{
 
 			return MainMenuHandler.getInstance().handleMenu(ussdRequest, currentState, menuService,
 					operationMetadataService, sessionDataService, infoMessageService, frontlineSmsConfigService);
@@ -270,15 +288,16 @@ public class OperationsMenuHandler implements MenuHandler {
 
 	@Override
 	public String recoverSession(UssdRequest request, CurrentState currentState, MenuService menuService,
-			SessionDataService sessionDataService) {
+			SessionDataService sessionDataService, OperationMetadataService operationMetadataService) {
 		currentState.setSessionId(request.getSessionId());
 		menuService.saveCurrentState(currentState);
 		Menu menu = menuService.findMenuById(currentState.getIdMenu());
 		if (ConstantUtils.MENU_CLINICS_LIST_CODE.equalsIgnoreCase(menu.getCode())
-				|| ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_CODE.equalsIgnoreCase(menu.getCode()) ||
-				ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE.equalsIgnoreCase(menu.getCode())  ) {
+				|| ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_CODE.equalsIgnoreCase(menu.getCode())
+				|| ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE.equalsIgnoreCase(menu.getCode())) {
 			return getClinicsByDistrictMenu(request, currentState, sessionDataService, menu);
-		} else if (ConstantUtils.MENU_APPOINTMENT_MONTH.equalsIgnoreCase(menu.getCode()) || ConstantUtils.MENU_APPOINTMENT_ON_REGISTRATION_MONTH.equalsIgnoreCase(menu.getCode() )) {
+		} else if (ConstantUtils.MENU_APPOINTMENT_MONTH.equalsIgnoreCase(menu.getCode())
+				|| ConstantUtils.MENU_APPOINTMENT_ON_REGISTRATION_MONTH.equalsIgnoreCase(menu.getCode())) {
 
 			return MessageFormat.format(MessageUtils.getMenuText(menu), DateUtils.getAppointmentsMonth());
 
@@ -287,6 +306,10 @@ public class OperationsMenuHandler implements MenuHandler {
 		} else if (ConstantUtils.MENU_CONFIRMATION_SMS_CLINICS_LIST_CODE.equalsIgnoreCase(menu.getCode())) {
 			menu.setDescription(MessageFormat.format(menu.getDescription(), request.getPhoneNumber()));
 			return MessageUtils.getMenuText(menu);
+		} else if (menu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_CODE)
+				|| menu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_RESCHEDULE_CODE)) {
+			return handleMenuConfirmationPage(request, currentState, menu, operationMetadataService, menuService,
+					sessionDataService);
 		}
 		return MessageUtils.getMenuText(menu);
 
@@ -318,26 +341,32 @@ public class OperationsMenuHandler implements MenuHandler {
 		if ((currentMenu.getMenuItems().size() > 1)
 				|| (currentMenu.getMenuItems().size() == 1 && StringUtils.trim(request.getText()).equals("0"))) {
 			// caso particular, se for clinica passa para a proxima tela
-			if ((currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_CODE ) || currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE))
+			if ((currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_CODE) || currentMenu
+					.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE))
 					&& !request.getText().equalsIgnoreCase("#") && !request.getText().equalsIgnoreCase("0")) {
 				Menu nextMenu = menuService.findMenuById(currentMenu.getNextMenuId());
 				currentState.setIdMenu(nextMenu.getId());
 				menuService.saveCurrentState(currentState);
-				if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_MONTH) || nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_RESCHEDULE_MONTH)) {
+				if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_MONTH)
+						|| nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_RESCHEDULE_MONTH)) {
 					return MessageFormat.format(MessageUtils.getMenuText(nextMenu), DateUtils.getAppointmentsMonth());
 				}
 				return MessageUtils.getMenuText(nextMenu);
-			} else if ((currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_RESCHEDULE_CODE) || currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_US_LIST_CODE))  && !StringUtils.trim(request.getText()).equals("0")  && !StringUtils.trim(request.getText()).equals("#") ) {
-					 Menu nextMenu = menuService.findMenuById(currentMenu.getNextMenuId());
-					 currentState.setIdMenu(nextMenu.getId());
-					 menuService.saveCurrentState(currentState);
-					 
-					 if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE) || nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_CODE)) {
-							return getClinicsByDistrictMenu(request, currentState, sessionDataService, nextMenu);
-						} 
-					 return MessageUtils.getMenuText(nextMenu);
+			} else if ((currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_RESCHEDULE_CODE)
+					|| currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_US_LIST_CODE))
+					&& !StringUtils.trim(request.getText()).equals("0")
+					&& !StringUtils.trim(request.getText()).equals("#")) {
+				Menu nextMenu = menuService.findMenuById(currentMenu.getNextMenuId());
+				currentState.setIdMenu(nextMenu.getId());
+				menuService.saveCurrentState(currentState);
 
-				   }
+				if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE)
+						|| nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_CODE)) {
+					return getClinicsByDistrictMenu(request, currentState, sessionDataService, nextMenu);
+				}
+				return MessageUtils.getMenuText(nextMenu);
+
+			}
 
 			// pega o menu pelo opcao introduzida
 			Optional<Menu> menu = menuService.getCurrentMenuBySessionId(currentMenu.getId(), request.getText());
@@ -349,39 +378,45 @@ public class OperationsMenuHandler implements MenuHandler {
 			menuService.saveCurrentState(currentState);
 			Menu nextMenu = menuService.findMenuById(menu.get().getNextMenuId());
 
-			if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_CODE) || 
-					nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_RESCHEDULE_CODE) ||
-					nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_US_LIST_CODE)) {
-				 return MessageFormat.format(MessageUtils.getMenuText(nextMenu), getProvincesMenu());
-			   } else if ((currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_RESCHEDULE_CODE) || currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_US_LIST_CODE) )
-					   && !StringUtils.trim(request.getText()).equals("0")){
-									 
-					 if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE) ||
-							 nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_CODE)) {
-							return getClinicsByDistrictMenu(request, currentState, sessionDataService, nextMenu);
-						} else {
-							  int selectedProvinceId = Integer.parseInt(sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "provinceId").getAttrValue());
-						        return MessageFormat.format(MessageUtils.getMenuText(nextMenu), getDistrictsMenu(selectedProvinceId, allProvinces, request));
-						}				 
+			if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_CODE)
+					|| nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_RESCHEDULE_CODE)
+					|| nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_US_LIST_CODE)) {
+				return MessageFormat.format(MessageUtils.getMenuText(nextMenu), getProvincesMenu());
+			} else if ((currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_RESCHEDULE_CODE)
+					|| currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_US_LIST_CODE))
+					&& !StringUtils.trim(request.getText()).equals("0")) {
 
-				   }else
-			if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_CODE)
-					|| nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_CODE )  ||   nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE )) {
+				if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE)
+						|| nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_CODE)) {
+					return getClinicsByDistrictMenu(request, currentState, sessionDataService, nextMenu);
+				} else {
+					int selectedProvinceId = Integer.parseInt(sessionDataService
+							.findByCurrentStateIdAndAttrName(currentState.getId(), "provinceId").getAttrValue());
+					return MessageFormat.format(MessageUtils.getMenuText(nextMenu),
+							getDistrictsMenu(selectedProvinceId, allProvinces, request));
+				}
+
+			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_CODE)
+					|| nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_CODE) || nextMenu.getCode()
+							.equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_RESCHEDULE_CODE)) {
 				return getClinicsByDistrictMenu(request, currentState, sessionDataService, nextMenu);
 			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_DETAILS_CODE)) {
 
 				return getAppointmentDetails(currentState, menuService, sessionDataService, nextMenu);
 
-			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_MONTH) ||  ConstantUtils.MENU_APPOINTMENT_RESCHEDULE_MONTH.equalsIgnoreCase(nextMenu.getCode() )) {
+			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_MONTH)
+					|| ConstantUtils.MENU_APPOINTMENT_RESCHEDULE_MONTH.equalsIgnoreCase(nextMenu.getCode())) {
 
 				return MessageFormat.format(MessageUtils.getMenuText(nextMenu), DateUtils.getAppointmentsMonth());
 
 			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CONFIRMATION_SMS_CLINICS_LIST_CODE)) {
 
 				nextMenu.setDescription(MessageFormat.format(nextMenu.getDescription(), request.getPhoneNumber()));
-			} else if (!"0".equalsIgnoreCase(request.getText()) && ConstantUtils.MENU_INFORMATIVE_MESSAGES.equalsIgnoreCase(currentMenu.getCode())) {
-			     //  FrontlineSmsConfig configsSms = frontlineSmsConfigService.findFrontlineSmsConfigByCode(ConstantUtils.FRONTLINE_SMS_CONFIG).get(0);
-				
+			} else if (!"0".equalsIgnoreCase(request.getText())
+					&& ConstantUtils.MENU_INFORMATIVE_MESSAGES.equalsIgnoreCase(currentMenu.getCode())) {
+				// FrontlineSmsConfig configsSms =
+				// frontlineSmsConfigService.findFrontlineSmsConfigByCode(ConstantUtils.FRONTLINE_SMS_CONFIG).get(0);
+
 				List<InfoMessage> listMessage = infoMessageService.findMessagesByCode(menu.get().getCode());
 				for (InfoMessage message : listMessage) {
 					RecipientSms[] recipients = new RecipientSms[1];
@@ -389,64 +424,79 @@ public class OperationsMenuHandler implements MenuHandler {
 					PayloadSms payload = new PayloadSms(message.getDescription(), recipients);
 					SendSmsRequest smsRequest = new SendSmsRequest();
 					smsRequest.setPayload(payload);
-				//	RestClient.getInstance().sendSms(smsRequest,configsSms);
+					// RestClient.getInstance().sendSms(smsRequest,configsSms);
 				}
 				MenuUtils.resetSession(currentState, menuService);
 				return MessageFormat.format(ConstantUtils.MESSAGE_INFORMATIVE_MESSAGES, request.getPhoneNumber());
-			} 
+			}
 
 			return MessageUtils.getMenuText(nextMenu);
 
 		} else {
-			
-			 currentState.setIdMenu(currentMenu.getNextMenuId());
-			 menuService.saveCurrentState(currentState);
-			 // pega o proximo menu
-			 Menu nextMenu = menuService.findMenuById(currentMenu.getNextMenuId());			
-			if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_CODE) ||  nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_RESCHEDULE_CODE)) {
-				// apresenta dados na tela de confirmacao
-				currentState.setIdMenu(nextMenu.getId());
-				menuService.saveCurrentState(currentState);
-				appointmentRequest = operationMetadataService.createAppointmentRequestByMetadatas(request,
-						currentState.getLocation(), currentState, nextMenu );
-				
-				appointmentRequest.setUtente(Long.parseLong(sessionDataService
-						.findByCurrentStateIdAndAttrName(currentState.getId(), "utenteId").getAttrValue()));
-				appointmentRequest.setClinicName(sessionDataService
-						.findByCurrentStateIdAndAttrName(currentState.getId(), "clinicName").getAttrValue());
-				appointmentRequest.setId(Long.parseLong(
-						sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "appointmentId").getAttrValue()));
 
-				String appointmentDetails = operationMetadataService.getAppointmentConfirmationData(appointmentRequest);
-				return MessageFormat.format(MessageUtils.getMenuText(nextMenu), appointmentDetails);
-
+			currentState.setIdMenu(currentMenu.getNextMenuId());
+			menuService.saveCurrentState(currentState);
+			// pega o proximo menu
+			Menu nextMenu = menuService.findMenuById(currentMenu.getNextMenuId());
+			if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_CODE) || nextMenu
+					.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_RESCHEDULE_CODE)) {
+				return handleMenuConfirmationPage(request, currentState, nextMenu, operationMetadataService,
+						menuService, sessionDataService);
 			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_RESCHEDULE_CODE)) {
-			        return MessageFormat.format(MessageUtils.getMenuText(nextMenu), getProvincesMenu());
-			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_RESCHEDULE_CODE) || nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_US_LIST_CODE)) {
-				  
-				   int selectedProvinceId = Integer.parseInt(sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "provinceId").getAttrValue());
-			        return MessageFormat.format(MessageUtils.getMenuText(nextMenu), getDistrictsMenu(selectedProvinceId, allProvinces, request));
-			        
-			     //   int selectedProvinceId = Integer.parseInt(sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "provinceId").getAttrValue());
-			      //  return MessageFormat.format(MessageUtils.getMenuText(nextMenu), getDistrictsMenu(selectedProvinceId, allProvinces, request));
-			 } else if 	(currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_CODE)
-						&& !request.getText().equalsIgnoreCase("#") && !request.getText().equalsIgnoreCase("0")) {
-				 return MessageUtils.getMenuText(nextMenu);
-				}
-			else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_MONTH) || nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_RESCHEDULE_MONTH)  ) {
+				return MessageFormat.format(MessageUtils.getMenuText(nextMenu), getProvincesMenu());
+			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_RESCHEDULE_CODE)
+					|| nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_US_LIST_CODE)) {
+
+				int selectedProvinceId = Integer.parseInt(sessionDataService
+						.findByCurrentStateIdAndAttrName(currentState.getId(), "provinceId").getAttrValue());
+				return MessageFormat.format(MessageUtils.getMenuText(nextMenu),
+						getDistrictsMenu(selectedProvinceId, allProvinces, request));
+
+				// int selectedProvinceId =
+				// Integer.parseInt(sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(),
+				// "provinceId").getAttrValue());
+				// return MessageFormat.format(MessageUtils.getMenuText(nextMenu),
+				// getDistrictsMenu(selectedProvinceId, allProvinces, request));
+			} else if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_CODE)
+					&& !request.getText().equalsIgnoreCase("#") && !request.getText().equalsIgnoreCase("0")) {
+				return MessageUtils.getMenuText(nextMenu);
+			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_MONTH)
+					|| nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_RESCHEDULE_MONTH)) {
 
 				return MessageFormat.format(getNextMenuText(currentState, currentMenu, menuService),
 						DateUtils.getAppointmentsMonth());
 
 			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CONFIRMATION_SMS_CLINICS_LIST_CODE)) {
-				
-				 nextMenu.setDescription(MessageFormat.format(nextMenu.getDescription(), request.getPhoneNumber()));
-				 
+
+				nextMenu.setDescription(MessageFormat.format(nextMenu.getDescription(), request.getPhoneNumber()));
+
 			}
 
 			return getNextMenuText(currentState, currentMenu, menuService);
 
 		}
+
+	}
+
+	// ================================== Private Behaviour ==============
+	private String handleMenuConfirmationPage(UssdRequest ussdRequest, CurrentState currentState, Menu menu,
+			OperationMetadataService operationMetadataService, MenuService menuService,
+			SessionDataService sessionDataService) {
+		// apresenta dados na tela de confirmacao
+		currentState.setIdMenu(menu.getId());
+		menuService.saveCurrentState(currentState);
+		appointmentRequest = operationMetadataService.createAppointmentRequestByMetadatas(ussdRequest,
+				currentState.getLocation(), currentState, menu);
+
+		appointmentRequest.setUtente(Long.parseLong(
+				sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "utenteId").getAttrValue()));
+		appointmentRequest.setClinicName(
+				sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "clinicName").getAttrValue());
+		appointmentRequest.setId(Long.parseLong(sessionDataService
+				.findByCurrentStateIdAndAttrName(currentState.getId(), "appointmentId").getAttrValue()));
+
+		String appointmentDetails = operationMetadataService.getAppointmentConfirmationData(appointmentRequest);
+		return MessageFormat.format(MessageUtils.getMenuText(menu), appointmentDetails);
 
 	}
 
@@ -456,7 +506,7 @@ public class OperationsMenuHandler implements MenuHandler {
 		String utenteId = sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "utenteId")
 				.getAttrValue();
 		AppointmentSearchResponse app = RestClient.getInstance().getAppointmentByUtenteId(utenteId);
-		if (app.getStatusCode() == 200) {
+		if (app.getStatusCode() == 200 || app.getStatusCode() == 201) {
 
 			sessionDataService.saveClinicOnSessionData(app.getClinic(), currentState.getId());
 			String details = MessageFormat.format(ConstantUtils.MESSAGE_APPOINTMENT_DETAILS,
@@ -464,9 +514,6 @@ public class OperationsMenuHandler implements MenuHandler {
 					app.getStatus());
 			return MessageFormat.format(MessageUtils.getMenuText(nextMenu), details);
 
-		} else if (app.getStatusCode() == 404) {
-			MenuUtils.resetSession(currentState, menuService);
-			return ConstantUtils.MESSAGE_APPOINTMENT_NOT_FOUND;
 		} else {
 			MenuUtils.resetSession(currentState, menuService);
 			return ConstantUtils.MESSAGE_UNEXPECTED_ERROR;
@@ -479,13 +526,12 @@ public class OperationsMenuHandler implements MenuHandler {
 		UtenteSearchResponse response = RestClient.getInstance().getUtenteBySystemNumber(request.getText());
 		String phoneNumber = StringUtils.trim(StringUtils.remove(request.getPhoneNumber(), "+258"));
 
-		
 		if (response.getStatusCode() == 200 && phoneNumber.equalsIgnoreCase(response.getCellNumber())) {
 			currentState.setIdMenu(currentMenu.getNextMenuId());
 			menuService.saveCurrentState(currentState);
 			sessionDataService.saveSessionData(response, currentState.getId());
 			// session.setAttribute("utenteSession", response);
-			//return getNextMenuText(currentState, currentMenu, menuService);
+			// return getNextMenuText(currentState, currentMenu, menuService);
 			Menu nextMenu = menuService.findMenuById(currentMenu.getNextMenuId());
 			return getAppointmentDetails(currentState, menuService, sessionDataService, nextMenu);
 		} else {
@@ -504,64 +550,63 @@ public class OperationsMenuHandler implements MenuHandler {
 		Menu nextMenu = menuService.findMenuById(currentMenu.getNextMenuId());
 		return MessageUtils.getMenuText(nextMenu);
 	}
-	
-	 private String getProvincesMenu() {
-	     String provinces = StringUtils.EMPTY;
-	     mapProvinces = new HashMap<>();
-	     allProvinces = RestClient.getInstance().getAllProvinces();
-	     int key = 1;
-	     for (Province province : allProvinces) {
-		   provinces += key + ". " + province.getDescription() + "\n";
-		   mapProvinces.put(String.valueOf(key), province);
-		   key++;
-	     }
-	     return provinces;
-       }
 
-       private String getDistrictsMenu(int idProvince, List<Province> allProvinces, UssdRequest ussdRequest) {
+	private String getProvincesMenu() {
+		String provinces = StringUtils.EMPTY;
+		mapProvinces = new HashMap<>();
+		allProvinces = RestClient.getInstance().getAllProvinces();
+		int key = 1;
+		for (Province province : allProvinces) {
+			provinces += key + ". " + province.getDescription() + "\n";
+			mapProvinces.put(String.valueOf(key), province);
+			key++;
+		}
+		return provinces;
+	}
 
-	     if (!ussdRequest.getText().equalsIgnoreCase("#") && !ussdRequest.getText().equalsIgnoreCase("0")) {
-		   startIndex = 0;
-		   lastIndex = pagingSize;
-		   districtList = new ArrayList<District>();
-		   districtList = allProvinces.stream().filter(p -> p.getId() == (idProvince)).findFirst().get().getDistricts().stream()
-			        .sorted(Comparator.comparing(District::getDescription)).collect(Collectors.toList());
-		   int key = 1;
-		   for (District dis : districtList) {
-			 dis.setOption(key + "");
-			 key++;
-		   }
+	private String getDistrictsMenu(int idProvince, List<Province> allProvinces, UssdRequest ussdRequest) {
 
-		   String menuText = getFormatedDistrictByList(districtList.subList(startIndex, pagingSize > districtList.size() ? districtList.size() : pagingSize));
+		if (!ussdRequest.getText().equalsIgnoreCase("#") && !ussdRequest.getText().equalsIgnoreCase("0")) {
+			startIndex = 0;
+			lastIndex = pagingSize;
+			districtList = new ArrayList<District>();
+			districtList = allProvinces.stream().filter(p -> p.getId() == (idProvince)).findFirst().get().getDistricts()
+					.stream().sorted(Comparator.comparing(District::getDescription)).collect(Collectors.toList());
+			int key = 1;
+			for (District dis : districtList) {
+				dis.setOption(key + "");
+				key++;
+			}
 
-		   startIndex = lastIndex;
-		   lastIndex = startIndex + pagingSize;
-		   return menuText;
+			String menuText = getFormatedDistrictByList(districtList.subList(startIndex,
+					pagingSize > districtList.size() ? districtList.size() : pagingSize));
 
-	     } else {
-		   if (lastIndex > districtList.size()) {
-			 return getFormatedDistrictByList(districtList.subList(startIndex, districtList.size()));
-		   }
-		   String menuText = getFormatedDistrictByList(districtList.subList(startIndex, lastIndex));
-		   startIndex = lastIndex;
-		   lastIndex = startIndex + pagingSize;
-		   return menuText;
-	     }
-       }
-       
-       private String getFormatedDistrictByList(List<District> list) {
-	     mapDistricts = new HashMap<String, District>();
-	     String menuDistricts = StringUtils.EMPTY;
+			startIndex = lastIndex;
+			lastIndex = startIndex + pagingSize;
+			return menuText;
 
-	     for (District item : list) {
-		   menuDistricts += item.getOption() + ". " + item.getDescription() + "\n";
-		   mapDistricts.put(String.valueOf(item.getOption()), item);
-	     }
+		} else {
+			if (lastIndex > districtList.size()) {
+				return getFormatedDistrictByList(districtList.subList(startIndex, districtList.size()));
+			}
+			String menuText = getFormatedDistrictByList(districtList.subList(startIndex, lastIndex));
+			startIndex = lastIndex;
+			lastIndex = startIndex + pagingSize;
+			return menuText;
+		}
+	}
 
-	     return menuDistricts;
-       }
+	private String getFormatedDistrictByList(List<District> list) {
+		mapDistricts = new HashMap<String, District>();
+		String menuDistricts = StringUtils.EMPTY;
 
+		for (District item : list) {
+			menuDistricts += item.getOption() + ". " + item.getDescription() + "\n";
+			mapDistricts.put(String.valueOf(item.getOption()), item);
+		}
 
+		return menuDistricts;
+	}
 
 	// Devolve a lista de clinicas, sobre uma paginacao definida
 	private String getClinicsByDistrictId(long districtId, UssdRequest ussdRequest) {
@@ -575,10 +620,9 @@ public class OperationsMenuHandler implements MenuHandler {
 				dis.setOption(key + "");
 				key++;
 			}
-			Integer lastElementIndex=pagingSize > clinicsList.size() ? clinicsList.size() : pagingSize; 
-			String menuText = getClinicsMenu(
-					clinicsList.subList(0,lastElementIndex));
-			
+			Integer lastElementIndex = pagingSize > clinicsList.size() ? clinicsList.size() : pagingSize;
+			String menuText = getClinicsMenu(clinicsList.subList(0, lastElementIndex));
+
 			startIndex = lastElementIndex;
 			lastIndex = startIndex + pagingSize;
 			return menuText;

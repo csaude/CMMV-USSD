@@ -16,6 +16,6 @@ public interface MenuHandler {
        public String handleMenu(UssdRequest ussdRequest, CurrentState currentState, MenuService menuService, OperationMetadataService operationMetadataService,
 		   SessionDataService sessionDataService, InfoMessageService infoMessageService, FrontlineSmsConfigService frontlineCSmsConfigService ) throws Throwable;
 
-       public String recoverSession(UssdRequest request, CurrentState currentState, MenuService menuService, SessionDataService sessionDataservice) throws Throwable;
+       public String recoverSession(UssdRequest request, CurrentState currentState, MenuService menuService, SessionDataService sessionDataservice, OperationMetadataService operationMetadataService) throws Throwable;
 
 }
