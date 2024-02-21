@@ -67,12 +67,12 @@ public class VmmcService {
 	private String handleCurrentState(UssdRequest ussdRequest, CurrentState currentState) throws Throwable {
 		if (currentState.getLocation().equalsIgnoreCase(LocationType.MENU_PRINCIPAL.getCode())) {
 			switch (ussdRequest.getText()) {
-			case "2":
+			case "1":
 			case "3":
 			case "4":
 				currentState.setLocation(LocationType.MENU_OPERACOES.getCode());
 				break;
-			case "1":
+			case "2":
 				currentState.setLocation(LocationType.MENU_CADASTRO.getCode());
 				break;
 			case "":

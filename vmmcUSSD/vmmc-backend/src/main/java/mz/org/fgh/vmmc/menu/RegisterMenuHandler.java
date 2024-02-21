@@ -66,7 +66,7 @@ public class RegisterMenuHandler implements MenuHandler {
 		if (currentMenu != null) {
 			if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_REGISTER_CONFIRMATION_CODE)) {
 				return handleRegisterConfirmation(ussdRequest, currentState, menuService);
-			}  if (!ussdRequest.getText().equals("0") && StringUtils.isNotBlank(currentMenu.getMenuField())) {
+			}  if (!ussdRequest.getText().equals(ConstantUtils.OPTION_VOLTAR) && StringUtils.isNotBlank(currentMenu.getMenuField())) {
 
 				// Grava os dados introduzidos na tabela de metadados (Ex: attrName: age;
 				OperationMetadata metadata = new OperationMetadata(currentState, currentState.getSessionId(),
@@ -121,11 +121,11 @@ public class RegisterMenuHandler implements MenuHandler {
 		// tiver apenas a opcao (0. Voltar), pega a opcao
 		// introduzida pelo user para saber o proximo menu;
 		if (currentMenu.getMenuItems().size() > 1
-				|| (currentMenu.getMenuItems().size() == 1 && StringUtils.trim(request.getText()).equals("0"))) {
+				|| (currentMenu.getMenuItems().size() == 1 && StringUtils.trim(request.getText()).equals(ConstantUtils.OPTION_VOLTAR))) {
 
 			// caso particular, se for clinica passa para a proxima tela
 			if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_ON_REGISTRATION_CODE)
-					&& !request.getText().equalsIgnoreCase("#") && !request.getText().equalsIgnoreCase("0")) {
+					&& !request.getText().equalsIgnoreCase(ConstantUtils.OPTION_VER_MAIS) && !request.getText().equalsIgnoreCase(ConstantUtils.OPTION_VOLTAR)) {
 				Menu nextMenu = menuService.findMenuById(currentMenu.getNextMenuId());
 				currentState.setIdMenu(nextMenu.getId());
 				menuService.saveCurrentState(currentState);
@@ -136,8 +136,8 @@ public class RegisterMenuHandler implements MenuHandler {
 			}
 
 			if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_CODE)
-					&& !StringUtils.trim(request.getText()).equals("0")
-					&& !StringUtils.trim(request.getText()).equals("#")) {
+					&& !StringUtils.trim(request.getText()).equals(ConstantUtils.OPTION_VOLTAR)
+					&& !StringUtils.trim(request.getText()).equals(ConstantUtils.OPTION_VER_MAIS)) {
 				Menu nextMenu = menuService.findMenuById(currentMenu.getNextMenuId());
 				currentState.setIdMenu(nextMenu.getId());
 				menuService.saveCurrentState(currentState);
@@ -271,7 +271,7 @@ public class RegisterMenuHandler implements MenuHandler {
 
 	private String getDistrictsMenu(int idProvince, List<Province> allProvinces, UssdRequest ussdRequest) {
 
-		if (!ussdRequest.getText().equalsIgnoreCase("#") && !ussdRequest.getText().equalsIgnoreCase("0")) {
+		if (!ussdRequest.getText().equalsIgnoreCase(ConstantUtils.OPTION_VER_MAIS) && !ussdRequest.getText().equalsIgnoreCase(ConstantUtils.OPTION_VOLTAR)) {
 			startIndex = 0;
 			lastIndex = pagingSize;
 			districtList = new ArrayList<District>();
@@ -323,7 +323,7 @@ public class RegisterMenuHandler implements MenuHandler {
 	// Devolve a lista de clinicas, sobre uma paginacao definida
 	private String getClinicsByDistrictId(long districtId, UssdRequest ussdRequest) {
 
-		if (ussdRequest == null || !ussdRequest.getText().equalsIgnoreCase("#")) {
+		if (ussdRequest == null || !ussdRequest.getText().equalsIgnoreCase(ConstantUtils.OPTION_VER_MAIS)) {
 
 			clinicsList = RestClient.getInstance().getClinicsByDistrict(districtId).getClinics().stream()
 					.sorted(Comparator.comparing(Clinic::getName)).collect(Collectors.toList());
@@ -449,7 +449,7 @@ public class RegisterMenuHandler implements MenuHandler {
 		int selectedProvinceId = Integer.parseInt(
 				sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "provinceId").getAttrValue());
 
-		if (ussdRequest.getText().equalsIgnoreCase("#")) {
+		if (ussdRequest.getText().equalsIgnoreCase(ConstantUtils.OPTION_VER_MAIS)) {
 
 			return MessageFormat.format(MessageUtils.getMenuText(currentMenu),
 					getDistrictsMenu(selectedProvinceId, allProvinces, ussdRequest));

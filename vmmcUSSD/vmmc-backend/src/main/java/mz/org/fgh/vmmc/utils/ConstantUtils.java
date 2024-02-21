@@ -34,6 +34,8 @@ public class ConstantUtils {
        public static final String MENU_CLINICS_LIST_APPOINTMENT_ON_REGISTRATION_CODE = "M079";
        public static final String MENU_APPOINTMENT_ON_REGISTRATION_MONTH = "M083";
        public static final String MENU_APPOINTMENT_ON_REGISTRATION_DAY = "M081";
+       public static final String OPTION_VER_MAIS = "99";
+       public static final String OPTION_VOLTAR = "0";
        
        
        
@@ -60,7 +62,7 @@ public class ConstantUtils {
        public static final String MESSAGE_REGISTER_VALUE_INVALID = "CON O valor introduzido e invalido. \n {0}";
        public static final String MESSAGE_REGISTER_PASSWORD_SMS = "Bem vindo ao CMMV, O seu codigo de utilizador:{0}. Digite *123# e introduza o seu codigo.";
        public static final String MESSAGE_INFORMATIVE_MESSAGES  = "END Sera enviado SMS para: {0}  com informacao educativa.";
-       public static final String MESSAGE_REGISTER_SUCESS_SMS ="END Sucesso. O seu codigo de utilizador e:{0}.";
+       public static final String MESSAGE_REGISTER_SUCESS_SMS ="END Sucesso. Aguarde pela confirmação da consulta. Apresente o codigo de utente {0} na consulta. ";
        public static final String MESSAGE_UPDATE_APPOINTMENT_ERROR ="END Opcao invalida. Nao e possivel alterar dados de consulta ja confirmada.";
        
        // Selected Options
