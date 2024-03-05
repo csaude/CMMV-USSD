@@ -30,11 +30,12 @@ import mz.org.fgh.vmmc.model.Menu;
 import mz.org.fgh.vmmc.model.OperationMetadata;
 import mz.org.fgh.vmmc.model.Province;
 import mz.org.fgh.vmmc.model.SessionData;
-import mz.org.fgh.vmmc.service.FrontlineSmsConfigService;
+import mz.org.fgh.vmmc.model.SmsConfiguration;
 import mz.org.fgh.vmmc.service.InfoMessageService;
 import mz.org.fgh.vmmc.service.MenuService;
 import mz.org.fgh.vmmc.service.OperationMetadataService;
 import mz.org.fgh.vmmc.service.SessionDataService;
+import mz.org.fgh.vmmc.service.SmsConfigurationService;
 import mz.org.fgh.vmmc.utils.ConstantUtils;
 import mz.org.fgh.vmmc.utils.DateUtils;
 import mz.org.fgh.vmmc.utils.MenuUtils;
@@ -65,7 +66,7 @@ public class OperationsMenuHandler implements MenuHandler {
 	@Override
 	public String handleMenu(UssdRequest ussdRequest, CurrentState currentState, MenuService menuService,
 			OperationMetadataService operationMetadataService, SessionDataService sessionDataService,
-			InfoMessageService infoMessageService, FrontlineSmsConfigService frontlineSmsConfigService)
+			InfoMessageService infoMessageService, SmsConfigurationService smsConfigurationService)
 			throws Throwable {
 
 		Menu currentMenu = menuService.getCurrentMenuBySessionId(currentState.getSessionId(), true);
@@ -75,7 +76,7 @@ public class OperationsMenuHandler implements MenuHandler {
 			if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_CODE) || currentMenu
 					.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_CONFIRMATION_RESCHEDULE_CODE)) {
 				return handleRegisterConfirmation(currentMenu, ussdRequest, currentState, menuService,
-						operationMetadataService, sessionDataService, infoMessageService, frontlineSmsConfigService);
+						operationMetadataService, sessionDataService, infoMessageService, smsConfigurationService);
 			}
 
 			else if (!ussdRequest.getText().equals(ConstantUtils.OPTION_VOLTAR)
@@ -85,13 +86,13 @@ public class OperationsMenuHandler implements MenuHandler {
 						|| currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_US_LIST_CODE)) {
 					return handleMenuProvince(currentMenu, ussdRequest, currentState, menuService,
 							operationMetadataService, sessionDataService, infoMessageService,
-							frontlineSmsConfigService);
+							smsConfigurationService);
 				} else if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_RESCHEDULE_CODE)
 						|| currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_DISTRICTS_US_LIST_CODE)) {
 
 					return handleMenuDistrict(currentMenu, ussdRequest, currentState, menuService,
 							operationMetadataService, sessionDataService, infoMessageService,
-							frontlineSmsConfigService);
+							smsConfigurationService);
 				} else if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_AUTHENTICATION_CODE)) {
 					return autenticate(currentMenu, ussdRequest, currentState, menuService, sessionDataService);
 				} else if (ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_CODE.equalsIgnoreCase(currentMenu.getCode())
@@ -105,7 +106,7 @@ public class OperationsMenuHandler implements MenuHandler {
 							&& ConstantUtils.MENU_CLINICS_LIST_CODE.equalsIgnoreCase(currentMenu.getCode())) {
 
 						return navegate(currentMenu, ussdRequest, currentState, menuService, operationMetadataService,
-								sessionDataService, infoMessageService, frontlineSmsConfigService);
+								sessionDataService, infoMessageService, smsConfigurationService);
 
 					} else if (mapClinics.containsKey(ussdRequest.getText())) {
 						// Seta o ID da clinica correspondente a opcao escolhida
@@ -123,8 +124,7 @@ public class OperationsMenuHandler implements MenuHandler {
 				} else if (ussdRequest.getText().equalsIgnoreCase("1")
 						&& ConstantUtils.MENU_CONFIRMATION_SMS_CLINICS_LIST_CODE
 								.equalsIgnoreCase(currentMenu.getCode())) {
-					// FrontlineSmsConfig configsSms =
-					// frontlineSmsConfigService.findFrontlineSmsConfigByCode(ConstantUtils.FRONTLINE_SMS_CONFIG).get(0);
+					Map<String, SmsConfiguration> configsSms = smsConfigurationService.findSmsConfigurationByCode("FRONTLINE_SMS_CONFIG");
 
 					long districtId = Long.parseLong(sessionDataService
 							.findByCurrentStateIdAndAttrName(currentState.getId(), "districtId").getAttrValue());
@@ -139,7 +139,7 @@ public class OperationsMenuHandler implements MenuHandler {
 					PayloadSms payload = new PayloadSms(getClinicsForSms(clinics), recipients);
 					SendSmsRequest smsRequest = new SendSmsRequest();
 					smsRequest.setPayload(payload);
-					// RestClient.getInstance().sendSms(smsRequest,configsSms);
+					 RestClient.getInstance().sendSms(smsRequest,configsSms);
 
 					return ConstantUtils.MESSAGE_SEND_SMS_CLINIC_LIST;
 
@@ -216,14 +216,14 @@ public class OperationsMenuHandler implements MenuHandler {
 			}
 
 			return navegate(currentMenu, ussdRequest, currentState, menuService, operationMetadataService,
-					sessionDataService, infoMessageService, frontlineSmsConfigService);
+					sessionDataService, infoMessageService, smsConfigurationService);
 
 		} else
 
 		{
 
 			return MainMenuHandler.getInstance().handleMenu(ussdRequest, currentState, menuService,
-					operationMetadataService, sessionDataService, infoMessageService, frontlineSmsConfigService);
+					operationMetadataService, sessionDataService, infoMessageService, smsConfigurationService);
 
 		}
 
@@ -235,7 +235,7 @@ public class OperationsMenuHandler implements MenuHandler {
 	// Responsavel por passar para o proximo menu
 	private String navegate(Menu currentMenu, UssdRequest request, CurrentState currentState, MenuService menuService,
 			OperationMetadataService operationMetadataService, SessionDataService sessionDataService,
-			InfoMessageService infoMessageService, FrontlineSmsConfigService frontlineSmsConfigService) {
+			InfoMessageService infoMessageService, SmsConfigurationService smsConfigurationService) {
 
 		// UtenteSearchResponse utente = (UtenteSearchResponse)
 		// httpSession.getAttribute("utenteSession");
@@ -321,8 +321,8 @@ public class OperationsMenuHandler implements MenuHandler {
 				nextMenu.setDescription(MessageFormat.format(nextMenu.getDescription(), request.getPhoneNumber()));
 			} else if (!ConstantUtils.OPTION_VOLTAR.equalsIgnoreCase(request.getText())
 					&& ConstantUtils.MENU_INFORMATIVE_MESSAGES.equalsIgnoreCase(currentMenu.getCode())) {
-				// FrontlineSmsConfig configsSms =
-				// frontlineSmsConfigService.findFrontlineSmsConfigByCode(ConstantUtils.FRONTLINE_SMS_CONFIG).get(0);
+				
+				Map<String, SmsConfiguration> configsSms = smsConfigurationService.findSmsConfigurationByCode("FRONTLINE_SMS_CONFIG");
 
 				List<InfoMessage> listMessage = infoMessageService.findMessagesByCode(menu.get().getCode());
 				for (InfoMessage message : listMessage) {
@@ -331,7 +331,7 @@ public class OperationsMenuHandler implements MenuHandler {
 					PayloadSms payload = new PayloadSms(message.getDescription(), recipients);
 					SendSmsRequest smsRequest = new SendSmsRequest();
 					smsRequest.setPayload(payload);
-					// RestClient.getInstance().sendSms(smsRequest,configsSms);
+					 RestClient.getInstance().sendSms(smsRequest,configsSms);
 				}
 				MenuUtils.resetSession(currentState, menuService);
 				return MessageFormat.format(ConstantUtils.MESSAGE_INFORMATIVE_MESSAGES, request.getPhoneNumber());
@@ -424,7 +424,7 @@ public class OperationsMenuHandler implements MenuHandler {
 	private String handleRegisterConfirmation(Menu currentMenu, UssdRequest ussdRequest, CurrentState currentState,
 			MenuService menuService, OperationMetadataService operationMetadataService,
 			SessionDataService sessionDataService, InfoMessageService infoMessageService,
-			FrontlineSmsConfigService frontlineSmsConfigService) throws Throwable {
+			SmsConfigurationService smsConfigurationService) throws Throwable {
 		if (ussdRequest.getText().equalsIgnoreCase("1")) {
 
 			AppointmentResponse response = RestClient.getInstance().updateAppointment(appointmentRequest);
@@ -445,7 +445,7 @@ public class OperationsMenuHandler implements MenuHandler {
 
 		} else if (ussdRequest.getText().equalsIgnoreCase(ConstantUtils.OPTION_VOLTAR)) {
 			return navegate(currentMenu, ussdRequest, currentState, menuService, operationMetadataService,
-					sessionDataService, infoMessageService, frontlineSmsConfigService);
+					sessionDataService, infoMessageService, smsConfigurationService);
 		} else {
 			String appointmentDetails = operationMetadataService.getAppointmentConfirmationData(appointmentRequest);
 			return MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA, StringUtils
@@ -457,7 +457,7 @@ public class OperationsMenuHandler implements MenuHandler {
 	private String handleMenuDistrict(Menu currentMenu, UssdRequest ussdRequest, CurrentState currentState,
 			MenuService menuService, OperationMetadataService operationMetadataService,
 			SessionDataService sessionDataService, InfoMessageService infoMessageService,
-			FrontlineSmsConfigService frontlineSmsConfigService) {
+			SmsConfigurationService smsConfigurationService) {
 		int selectedProvinceId = Integer.parseInt(
 				sessionDataService.findByCurrentStateIdAndAttrName(currentState.getId(), "provinceId").getAttrValue());
 
@@ -479,7 +479,7 @@ public class OperationsMenuHandler implements MenuHandler {
 
 		}
 		return navegate(currentMenu, ussdRequest, currentState, menuService, operationMetadataService,
-				sessionDataService, infoMessageService, frontlineSmsConfigService);
+				sessionDataService, infoMessageService, smsConfigurationService);
 	}
 
 	private String getClinicsByDistrictMenu(UssdRequest request, CurrentState currentState,
@@ -492,7 +492,7 @@ public class OperationsMenuHandler implements MenuHandler {
 	private String handleMenuProvince(Menu currentMenu, UssdRequest ussdRequest, CurrentState currentState,
 			MenuService menuService, OperationMetadataService operationMetadataService,
 			SessionDataService sessionDataService, InfoMessageService infoMessageService,
-			FrontlineSmsConfigService frontlineSmsConfigService) throws Throwable {
+			SmsConfigurationService smsConfigurationService) throws Throwable {
 		if (mapProvinces.containsKey(ussdRequest.getText())) {
 			SessionData sd = new SessionData(currentState.getId(), "provinceId",
 					mapProvinces.get(ussdRequest.getText()).getId() + "");
@@ -503,7 +503,7 @@ public class OperationsMenuHandler implements MenuHandler {
 					.remove(MessageFormat.format(MessageUtils.getMenuText(currentMenu), getProvincesMenu()), "CON "));
 		}
 		return navegate(currentMenu, ussdRequest, currentState, menuService, operationMetadataService,
-				sessionDataService, infoMessageService, frontlineSmsConfigService);
+				sessionDataService, infoMessageService, smsConfigurationService);
 	}
 
 	// ================================== Private Behaviour ==============

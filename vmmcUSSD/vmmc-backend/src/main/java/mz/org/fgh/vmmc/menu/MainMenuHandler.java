@@ -6,12 +6,11 @@ import mz.org.fgh.vmmc.commons.LocationType;
 import mz.org.fgh.vmmc.inout.UssdRequest;
 import mz.org.fgh.vmmc.model.CurrentState;
 import mz.org.fgh.vmmc.model.Menu;
-import mz.org.fgh.vmmc.service.FrontlineSmsConfigService;
 import mz.org.fgh.vmmc.service.InfoMessageService;
 import mz.org.fgh.vmmc.service.MenuService;
 import mz.org.fgh.vmmc.service.OperationMetadataService;
 import mz.org.fgh.vmmc.service.SessionDataService;
-import mz.org.fgh.vmmc.utils.ConstantUtils;
+import mz.org.fgh.vmmc.service.SmsConfigurationService;
 import mz.org.fgh.vmmc.utils.MessageUtils;
 
 public class MainMenuHandler implements MenuHandler {
@@ -27,7 +26,7 @@ public class MainMenuHandler implements MenuHandler {
 
        @Override
        public String handleMenu(UssdRequest ussdRequest, CurrentState currentState, MenuService menuService, OperationMetadataService operationMetadataService,
-		   SessionDataService sessionDataService, InfoMessageService infoMessageService, FrontlineSmsConfigService frontlineCSmsConfigService) {
+		   SessionDataService sessionDataService, InfoMessageService infoMessageService, SmsConfigurationService smsConfigurationService) {
 
 	     if (currentState == null) {
 	    	 currentState = new CurrentState(ussdRequest.getSessionId(), 1, true, LocationType.MENU_PRINCIPAL.getCode(), ussdRequest.getPhoneNumber(), LocalDateTime.now());

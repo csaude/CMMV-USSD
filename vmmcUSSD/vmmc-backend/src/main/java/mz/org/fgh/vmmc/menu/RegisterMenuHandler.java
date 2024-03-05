@@ -14,6 +14,9 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import mz.org.fgh.vmmc.client.RestClient;
+import mz.org.fgh.vmmc.inout.PayloadSms;
+import mz.org.fgh.vmmc.inout.RecipientSms;
+import mz.org.fgh.vmmc.inout.SendSmsRequest;
 import mz.org.fgh.vmmc.inout.UssdRequest;
 import mz.org.fgh.vmmc.inout.UtenteRegisterRequest;
 import mz.org.fgh.vmmc.inout.UtenteRegisterResponse;
@@ -24,11 +27,12 @@ import mz.org.fgh.vmmc.model.Menu;
 import mz.org.fgh.vmmc.model.OperationMetadata;
 import mz.org.fgh.vmmc.model.Province;
 import mz.org.fgh.vmmc.model.SessionData;
-import mz.org.fgh.vmmc.service.FrontlineSmsConfigService;
+import mz.org.fgh.vmmc.model.SmsConfiguration;
 import mz.org.fgh.vmmc.service.InfoMessageService;
 import mz.org.fgh.vmmc.service.MenuService;
 import mz.org.fgh.vmmc.service.OperationMetadataService;
 import mz.org.fgh.vmmc.service.SessionDataService;
+import mz.org.fgh.vmmc.service.SmsConfigurationService;
 import mz.org.fgh.vmmc.utils.ConstantUtils;
 import mz.org.fgh.vmmc.utils.DateUtils;
 import mz.org.fgh.vmmc.utils.MenuUtils;
@@ -60,13 +64,15 @@ public class RegisterMenuHandler implements MenuHandler {
 	@Override
 	public String handleMenu(UssdRequest ussdRequest, CurrentState currentState, MenuService menuService,
 			OperationMetadataService operationMetadataService, SessionDataService sessionDataService,
-			InfoMessageService infoMessageService, FrontlineSmsConfigService frontlineSmsConfigService) {
+			InfoMessageService infoMessageService, SmsConfigurationService smsConfigurationService) {
 
 		Menu currentMenu = menuService.getCurrentMenuBySessionId(currentState.getSessionId(), true);
 		if (currentMenu != null) {
 			if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_REGISTER_CONFIRMATION_CODE)) {
-				return handleRegisterConfirmation(ussdRequest, currentState, menuService);
-			}  if (!ussdRequest.getText().equals(ConstantUtils.OPTION_VOLTAR) && StringUtils.isNotBlank(currentMenu.getMenuField())) {
+				return handleRegisterConfirmation(ussdRequest, currentState, menuService, smsConfigurationService);
+			}
+			if (!ussdRequest.getText().equals(ConstantUtils.OPTION_VOLTAR)
+					&& StringUtils.isNotBlank(currentMenu.getMenuField())) {
 
 				// Grava os dados introduzidos na tabela de metadados (Ex: attrName: age;
 				OperationMetadata metadata = new OperationMetadata(currentState, currentState.getSessionId(),
@@ -104,7 +110,7 @@ public class RegisterMenuHandler implements MenuHandler {
 					sessionDataService);
 		} else {
 			return MainMenuHandler.getInstance().handleMenu(ussdRequest, currentState, menuService,
-					operationMetadataService, sessionDataService, infoMessageService, frontlineSmsConfigService);
+					operationMetadataService, sessionDataService, infoMessageService, smsConfigurationService);
 		}
 
 	}
@@ -120,12 +126,13 @@ public class RegisterMenuHandler implements MenuHandler {
 		// se tiver mais opcoes para seleccionar e não somente a opcao (0. Voltar) OU se
 		// tiver apenas a opcao (0. Voltar), pega a opcao
 		// introduzida pelo user para saber o proximo menu;
-		if (currentMenu.getMenuItems().size() > 1
-				|| (currentMenu.getMenuItems().size() == 1 && StringUtils.trim(request.getText()).equals(ConstantUtils.OPTION_VOLTAR))) {
+		if (currentMenu.getMenuItems().size() > 1 || (currentMenu.getMenuItems().size() == 1
+				&& StringUtils.trim(request.getText()).equals(ConstantUtils.OPTION_VOLTAR))) {
 
 			// caso particular, se for clinica passa para a proxima tela
 			if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CLINICS_LIST_APPOINTMENT_ON_REGISTRATION_CODE)
-					&& !request.getText().equalsIgnoreCase(ConstantUtils.OPTION_VER_MAIS) && !request.getText().equalsIgnoreCase(ConstantUtils.OPTION_VOLTAR)) {
+					&& !request.getText().equalsIgnoreCase(ConstantUtils.OPTION_VER_MAIS)
+					&& !request.getText().equalsIgnoreCase(ConstantUtils.OPTION_VOLTAR)) {
 				Menu nextMenu = menuService.findMenuById(currentMenu.getNextMenuId());
 				currentState.setIdMenu(nextMenu.getId());
 				menuService.saveCurrentState(currentState);
@@ -271,7 +278,8 @@ public class RegisterMenuHandler implements MenuHandler {
 
 	private String getDistrictsMenu(int idProvince, List<Province> allProvinces, UssdRequest ussdRequest) {
 
-		if (!ussdRequest.getText().equalsIgnoreCase(ConstantUtils.OPTION_VER_MAIS) && !ussdRequest.getText().equalsIgnoreCase(ConstantUtils.OPTION_VOLTAR)) {
+		if (!ussdRequest.getText().equalsIgnoreCase(ConstantUtils.OPTION_VER_MAIS)
+				&& !ussdRequest.getText().equalsIgnoreCase(ConstantUtils.OPTION_VOLTAR)) {
 			startIndex = 0;
 			lastIndex = pagingSize;
 			districtList = new ArrayList<District>();
@@ -365,16 +373,17 @@ public class RegisterMenuHandler implements MenuHandler {
 	// =======================MENUS
 	// HANDLERS============================================================
 	private String handleRegisterConfirmation(UssdRequest ussdRequest, CurrentState currentState,
-			MenuService menuService) {
+			MenuService menuService, SmsConfigurationService smsConfigurationService) {
 		if (ussdRequest.getText().equalsIgnoreCase("1")) {
-			return handleRegisterConfirmationOption1(currentState, menuService);
+			return handleRegisterConfirmationOption1(currentState, menuService, smsConfigurationService, ussdRequest);
 		} else if (ussdRequest.getText().equalsIgnoreCase("2")) {
 			return handleRegisterConfirmationOption2(currentState, menuService);
 		}
 		return ConstantUtils.MESSAGE_OPCAO_INVALIDA;
 	}
 
-	private String handleRegisterConfirmationOption1(CurrentState currentState, MenuService menuService) {
+	private String handleRegisterConfirmationOption1(CurrentState currentState, MenuService menuService,
+			SmsConfigurationService smsConfigurationService, UssdRequest ussdRequest) {
 		UtenteRegisterResponse response = RestClient.getInstance().registerUtente(utenteRequest);
 
 		if ((response.getStatusCode() != 200 && response.getStatusCode() != 201)
@@ -383,28 +392,32 @@ public class RegisterMenuHandler implements MenuHandler {
 			return ConstantUtils.MESSAGE_REGISTER_ERROR;
 		} else {
 			MenuUtils.resetSession(currentState, menuService);
-			/*
-			 * try { FrontlineSmsConfig configsSms =
-			 * frontlineSmsConfigService.findFrontlineSmsConfigByCode(ConstantUtils.
-			 * FRONTLINE_SMS_CONFIG).get(0); String smsBody =
-			 * MessageFormat.format(ConstantUtils.MESSAGE_REGISTER_PASSWORD_SMS,
-			 * response.getSystemNumber()); MenuUtils.resetSession(currentState,
-			 * menuService); RecipientSms[] recipients = new RecipientSms[1]; recipients[0]
-			 * = new RecipientSms(ConstantUtils.TYPE_RECIEPIENT_MOBILE,
-			 * ussdRequest.getPhoneNumber()); PayloadSms payload = new PayloadSms(smsBody,
-			 * recipients); SendSmsRequest smsRequest = new SendSmsRequest();
-			 * smsRequest.setPayload(payload); try {
-			 * RestClient.getInstance().sendSms(smsRequest, configsSms); } catch (Exception
-			 * e) { LOG.
-			 * error("[RegisterMenuHandler.handleMenu] Ocorreu um erro ao enviar SMS, apos o registo do utente: "
-			 * + ussdRequest.getPhoneNumber(), e); } return
-			 * ConstantUtils.MENU_REGISTER_SUCCESS; } catch (Exception e) { //nao onsguiu
-			 * enviar o sms com a confirmacao de registo, entao mostra na tela return
-			 * MessageFormat.format( "END" +ConstantUtils.MESSAGE_REGISTER_PASSWORD_SMS,
-			 * response.getSystemNumber());
-			 * 
-			 * }
-			 */
+
+			try {
+				Map<String, SmsConfiguration> configsSms = smsConfigurationService.findSmsConfigurationByCode("FRONTLINE_SMS_CONFIG");
+				String smsBody = MessageFormat.format(ConstantUtils.MESSAGE_REGISTER_PASSWORD_SMS,
+						response.getSystemNumber());
+				MenuUtils.resetSession(currentState, menuService);
+				RecipientSms[] recipients = new RecipientSms[1];
+				recipients[0] = new RecipientSms(ConstantUtils.TYPE_RECIEPIENT_MOBILE, ussdRequest.getPhoneNumber());
+				PayloadSms payload = new PayloadSms(smsBody, recipients);
+				SendSmsRequest smsRequest = new SendSmsRequest();
+				smsRequest.setPayload(payload);
+				try {
+					RestClient.getInstance().sendSms(smsRequest, configsSms);
+				} catch (Exception e) {
+					LOG.error(
+							"[RegisterMenuHandler.handleMenu] Ocorreu um erro ao enviar SMS, apos o registo do utente: "
+									+ ussdRequest.getPhoneNumber(),
+							e);
+				}
+				return ConstantUtils.MENU_REGISTER_SUCCESS;
+			} catch (Exception e) { // nao onsguiu
+				// enviar o sms com a confirmacao de registo, entao mostra na tela return
+				MessageFormat.format("END" + ConstantUtils.MESSAGE_REGISTER_PASSWORD_SMS, response.getSystemNumber());
+
+			}
+
 			return MessageFormat.format(ConstantUtils.MESSAGE_REGISTER_SUCESS_SMS, response.getSystemNumber());
 		}
 	}

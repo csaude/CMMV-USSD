@@ -13,11 +13,11 @@ import mz.org.fgh.vmmc.inout.UssdRequest;
 import mz.org.fgh.vmmc.menu.MenuHandler;
 import mz.org.fgh.vmmc.menu.MenuHandlerType;
 import mz.org.fgh.vmmc.model.CurrentState;
-import mz.org.fgh.vmmc.service.FrontlineSmsConfigService;
 import mz.org.fgh.vmmc.service.InfoMessageService;
 import mz.org.fgh.vmmc.service.MenuService;
 import mz.org.fgh.vmmc.service.OperationMetadataService;
 import mz.org.fgh.vmmc.service.SessionDataService;
+import mz.org.fgh.vmmc.service.SmsConfigurationService;
 import mz.org.fgh.vmmc.utils.ConstantUtils;
 import mz.org.fgh.vmmc.utils.MessageUtils;
 
@@ -40,7 +40,7 @@ public class VmmcService {
 	InfoMessageService infoMessageService;
 
 	@Autowired
-	FrontlineSmsConfigService frontlineSmsConfigService;
+	SmsConfigurationService smsConfigurationService;
 
 	public String invokeVmmcUssdService(String sessionId, String serviceCode, String phoneNumber, String text)
 			throws Throwable {
@@ -53,7 +53,7 @@ public class VmmcService {
 		if (currentState == null) {
 			return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdRequest, currentState,
 					menuService, operationMetadataService, sessionDataService, infoMessageService,
-					frontlineSmsConfigService);
+					smsConfigurationService);
 		}
 
 		long seconds = Duration.between(currentState.getCreatedDate(), LocalDateTime.now()).getSeconds();
@@ -82,10 +82,10 @@ public class VmmcService {
 				return ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR;
 			}
 			return menuTypes.get(currentState.getLocation()).handleMenu(ussdRequest, currentState, menuService,
-					operationMetadataService, sessionDataService, infoMessageService, frontlineSmsConfigService);
+					operationMetadataService, sessionDataService, infoMessageService, smsConfigurationService);
 		} else {
 			return menuTypes.get(currentState.getLocation()).handleMenu(ussdRequest, currentState, menuService,
-					operationMetadataService, sessionDataService, infoMessageService, frontlineSmsConfigService);
+					operationMetadataService, sessionDataService, infoMessageService, smsConfigurationService);
 		}
 	}
 
@@ -100,7 +100,7 @@ public class VmmcService {
 		case "2":
 			return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdRequest, currentState,
 					menuService, operationMetadataService, sessionDataService, infoMessageService,
-					frontlineSmsConfigService);
+					smsConfigurationService);
 		default:
 			return ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR;
 		}
