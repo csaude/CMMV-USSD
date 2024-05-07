@@ -6,11 +6,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import mz.org.fgh.vmmc.controller.VmmcService;
 import mz.org.fgh.vmmc.utils.ConstantUtils;
 
 @SpringBootApplication(scanBasePackages = "mz.org.fgh")
 @RestController
+@Api(tags = "USSD API Documentation")
 public class VodacomRestController {
 	 Logger logger = Logger.getLogger(VmmcService.class.getName());
 	private VmmcService service;
@@ -20,6 +23,7 @@ public class VodacomRestController {
 	}
 
 	@PostMapping(path = "vmmcUssd")
+    @ApiOperation("Return Ussd Menus")
 	public String ussdIngress(@RequestParam String sessionId, @RequestParam String serviceCode,
 			@RequestParam String phoneNumber, @RequestParam String text) {
 		try {
