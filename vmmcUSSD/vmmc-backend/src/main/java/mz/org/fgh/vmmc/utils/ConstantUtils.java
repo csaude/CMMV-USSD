@@ -40,30 +40,30 @@ public class ConstantUtils {
        
        
        // mensagens menus
-       public static final String MENU_PRINCIPAL_DESCRIPTION = "CON Bem Vindo ao CMMV \n  1. Entrar \n  2. Marcar Consulta";
-       public static final String MENU_SESSION_RECOVER_DESCRIPTION = "CON Voltar para o passo anterior? \n  1. Sim \n  2. Nao";
-       public static final String MENU_REGISTER_SUCCESS = "END O seu cadastro foi feito com sucesso \n Sera enviado um SMS com o codigo de acesso a sua conta.";
-       public static final String MESSAGE_SEND_SMS_CLINIC_LIST = "END Sera enviado SMS com a lista de unidades sanidarias do seu distrito";
-       public static final String MESSAGE_APPOINTMENT_NOT_CONFIRMED = "END A sua consulta nao foi marcada,Obrigado pela preferencia.";
-       public static final String MESSAGE_APPOINTMENT_SUCCESS = "END A sua consulta foi marcada com sucesso.";
-       public static final String MESSAGE_REGISTER_NOT_CONFIRMED = "END O seu registo nao foi efectuado,Obrigado pela preferencia.";
+       public static final String MENU_PRINCIPAL_DESCRIPTION = "Bem Vindo ao CMMV \n  1. Entrar \n  2. Marcar Consulta";
+       public static final String MENU_SESSION_RECOVER_DESCRIPTION = "Voltar para o passo anterior? \n  1. Sim \n  2. Nao";
+       public static final String MENU_REGISTER_SUCCESS = "O seu cadastro foi feito com sucesso \n Sera enviado um SMS com o codigo de acesso a sua conta.";
+       public static final String MESSAGE_SEND_SMS_CLINIC_LIST = "Sera enviado SMS com a lista de unidades sanidarias do seu distrito";
+       public static final String MESSAGE_APPOINTMENT_NOT_CONFIRMED = "A sua consulta nao foi marcada,Obrigado pela preferencia.";
+       public static final String MESSAGE_APPOINTMENT_SUCCESS = "A sua consulta foi marcada com sucesso.";
+       public static final String MESSAGE_REGISTER_NOT_CONFIRMED = "O seu registo nao foi efectuado,Obrigado pela preferencia.";
 
        // generic error message
-       public static final String MESSAGE_UNEXPECTED_ERROR = "END Ocorreu um erro Inesperado.";
-       public static final String MESSAGE_OPCAO_INVALIDA = "CON Opcao introduzida invalida. {0} \n";
-       public static final String MESSAGE_APPOINTMENT_NOT_FOUND = "END Nao possui consulta marcada.";
-       public static final String MESSAGE_OPCAO_INVALIDA_TERMINAR = "END Opcao introduzida invalida";
-       public static final String MESSAGE_REGISTER_ERROR = "END Ocorreu erro ao efectuar o registo.";
-       public static final String MESSAGE_LOGIN_FAILED = "CON Codigo de utilizador invalido. \n {0} ";
-       public static final String MESSAGE_APPOINTMENT_FAILED = "END Ocorreu erro ao marcar consulta.";
+       public static final String MESSAGE_UNEXPECTED_ERROR = "Ocorreu um erro Inesperado.";
+       public static final String MESSAGE_OPCAO_INVALIDA = "Opcao introduzida invalida. {0} \n";
+       public static final String MESSAGE_APPOINTMENT_NOT_FOUND = "Nao possui consulta marcada.";
+       public static final String MESSAGE_OPCAO_INVALIDA_TERMINAR = "Opcao introduzida invalida";
+       public static final String MESSAGE_REGISTER_ERROR = "Ocorreu erro ao efectuar o registo.";
+       public static final String MESSAGE_LOGIN_FAILED = "Codigo de utilizador invalido. \n {0} ";
+       public static final String MESSAGE_APPOINTMENT_FAILED = "Ocorreu erro ao marcar consulta.";
        public static final String MESSAGE_APPOINTMENT_DETAILS = "\n Data da Consulta:  {0}  \n Unidade Sanitaria: {1} \n Estado da Consulta: {2} ";
-       public static final String MESSAGE_APPOINTMENT_DAY_INVALID = "CON O dia introduzido e invalido \n {0}.";
-       public static final String MESSAGE_REGISTER_AGE_INVALID = "CON Idade invalida, A sua idade deve ser igual ou superior a 14 anos. \n {0}";
-       public static final String MESSAGE_REGISTER_VALUE_INVALID = "CON O valor introduzido e invalido. \n {0}";
-       public static final String MESSAGE_REGISTER_PASSWORD_SMS = "Bem vindo ao CMMV, O seu codigo de utilizador:{0}. Digite *123# e introduza o seu codigo.";
-       public static final String MESSAGE_INFORMATIVE_MESSAGES  = "END Sera enviado SMS para: {0}  com informacao educativa.";
-       public static final String MESSAGE_REGISTER_SUCESS_SMS ="END Sucesso. Aguarde pela confirmação da consulta. Apresente o codigo de utente {0} na consulta. ";
-       public static final String MESSAGE_UPDATE_APPOINTMENT_ERROR ="END Opcao invalida. Nao e possivel alterar dados de consulta ja confirmada.";
+       public static final String MESSAGE_APPOINTMENT_DAY_INVALID = "O dia introduzido e invalido \n {0}.";
+       public static final String MESSAGE_REGISTER_AGE_INVALID = "Idade invalida, A sua idade deve ser igual ou superior a 14 anos. \n {0}";
+       public static final String MESSAGE_REGISTER_VALUE_INVALID = "O valor introduzido e invalido. \n {0}";
+       public static final String MESSAGE_REGISTER_PASSWORD_SMS = "Bem vindo ao CMMV, O seu codigo de utilizador:{0}. Digite *660# e introduza o seu codigo.";
+       public static final String MESSAGE_INFORMATIVE_MESSAGES  = "Sera enviado SMS para: {0}  com informacao educativa.";
+       public static final String MESSAGE_REGISTER_SUCESS_SMS ="Sucesso. Aguarde pela confirmação da consulta. Apresente o codigo de utente {0} na consulta. ";
+       public static final String MESSAGE_UPDATE_APPOINTMENT_ERROR ="Opcao invalida. Nao e possivel alterar dados de consulta ja confirmada.";
        
        // Selected Options
        public static final String TYPE_RECIEPIENT_MOBILE = "mobile";

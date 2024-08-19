@@ -9,119 +9,129 @@ import javax.persistence.*;
 @Table(name = "Menu")
 public class Menu implements Comparable<Menu> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private long id;
 
-    @Column(name = "code")
-    private String code;
+	@Column(name = "code")
+	private String code;
 
-    @Column(name = "option")
-    private String option;
+	@Column(name = "option")
+	private String option;
 
-    @Column(name = "description")
-    private String description;
+	@Column(name = "description")
+	private String description;
 
-    @Column(name = "nextMenuId")
-    private long nextMenuId;
+	@Column(name = "nextMenuId")
+	private long nextMenuId;
 
-    @OneToMany(mappedBy = "parentMenu")
-    private List<Menu> menuItems;
+	@OneToMany(mappedBy = "parentMenu")
+	private List<Menu> menuItems;
 
-    @Column(name = "menuField")
-    private String menuField;
+	@Column(name = "menuField")
+	private String menuField;
 
-    @ManyToOne
-    @JoinColumn(name = "parent_menu_id")
-    private Menu parentMenu;
-    
-    @Column(name = "orderMenu")
-    private Integer orderMenu;
-    
+	@ManyToOne
+	@JoinColumn(name = "parent_menu_id")
+	private Menu parentMenu;
 
-    public Menu() {
-    }
+	@Column(name = "orderMenu")
+	private Integer orderMenu;
 
-    public Menu(String code, String option, String description, long nextMenuId, List<Menu> menuItems, String menuField, Menu parentMenu) {
-	super();
-	this.code = code;
-	this.option = option;
-	this.description = description;
-	this.nextMenuId = nextMenuId;
-	this.menuItems = menuItems;
-	this.menuField = menuField;
-	this.parentMenu = parentMenu;
-    }
+	@Column(name = "action")
+	private String action;
 
-    public String getDescription() {
-	return description;
-    }
+	public Menu() {
+	}
 
-    public void setDescription(String description) {
-	this.description = description;
-    }
+	public Menu(String code, String option, String description, long nextMenuId, List<Menu> menuItems, String menuField,
+			Menu parentMenu) {
+		super();
+		this.code = code;
+		this.option = option;
+		this.description = description;
+		this.nextMenuId = nextMenuId;
+		this.menuItems = menuItems;
+		this.menuField = menuField;
+		this.parentMenu = parentMenu;
+	}
 
-    public String getCode() {
-	return code;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setCode(String code) {
-	this.code = code;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public long getId() {
-	return id;
-    }
+	public String getCode() {
+		return code;
+	}
 
-    public long getNextMenuId() {
-	return nextMenuId;
-    }
+	public void setCode(String code) {
+		this.code = code;
+	}
 
-    public void setNextMenuId(long nextMenu) {
-	this.nextMenuId = nextMenu;
-    }
+	public long getId() {
+		return id;
+	}
 
-    public void setId(long id) {
-	this.id = id;
-    }
+	public long getNextMenuId() {
+		return nextMenuId;
+	}
 
-    public List<Menu> getMenuItems() {
-	  Collections.sort(this.menuItems); 
-	  return this.menuItems;
-    }
+	public void setNextMenuId(long nextMenu) {
+		this.nextMenuId = nextMenu;
+	}
 
-    public void setMenuItems(List<Menu> menuItems) {
-	this.menuItems = menuItems;
-    }
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public Menu getParentMenu() {
-	return parentMenu;
-    }
+	public List<Menu> getMenuItems() {
+		Collections.sort(this.menuItems);
+		return this.menuItems;
+	}
 
-    public void setParentMenu(Menu parentMenu) {
-	this.parentMenu = parentMenu;
-    }
+	public void setMenuItems(List<Menu> menuItems) {
+		this.menuItems = menuItems;
+	}
 
-    public String getMenuField() {
-	return menuField;
-    }
+	public Menu getParentMenu() {
+		return parentMenu;
+	}
 
-    public void setMenuField(String menuField) {
-	this.menuField = menuField;
-    }
+	public void setParentMenu(Menu parentMenu) {
+		this.parentMenu = parentMenu;
+	}
 
-    public String getOption() {
-	return option;
-    }
+	public String getMenuField() {
+		return menuField;
+	}
 
-    public void setOption(String option) {
-	this.option = option;
-    }
-    
-    @Override
-    public int compareTo(Menu otherMenu) {
-        return Integer.compare(this.orderMenu, otherMenu.orderMenu);
-    }
+	public void setMenuField(String menuField) {
+		this.menuField = menuField;
+	}
 
+	public String getOption() {
+		return option;
+	}
+
+	public void setOption(String option) {
+		this.option = option;
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
+	}
+
+	@Override
+	public int compareTo(Menu otherMenu) {
+		return Integer.compare(this.orderMenu, otherMenu.orderMenu);
+	}
 
 }

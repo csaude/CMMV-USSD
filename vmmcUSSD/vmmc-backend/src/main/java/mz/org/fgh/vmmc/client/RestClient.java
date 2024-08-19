@@ -35,7 +35,6 @@ import mz.org.fgh.vmmc.inout.UtenteRegisterRequest;
 import mz.org.fgh.vmmc.inout.UtenteRegisterResponse;
 import mz.org.fgh.vmmc.inout.UtenteSearchResponse;
 import mz.org.fgh.vmmc.model.Clinic;
-import mz.org.fgh.vmmc.model.FrontlineSmsConfig;
 import mz.org.fgh.vmmc.model.Login;
 import mz.org.fgh.vmmc.model.Province;
 import mz.org.fgh.vmmc.model.SmsConfiguration;
@@ -185,12 +184,12 @@ public class RestClient {
 	}
 
 	public SendSmsResponse sendSms(SendSmsRequest request, Map<String, SmsConfiguration> configsSms) {
-		String apiKey = configsSms.get("API_KEY").getAttrValue();
+		String service = configsSms.get("SERVICE").getAttrValue();
 		String endPoint = configsSms.get("ENDPOINT").getAttrValue();
 		SendSmsResponse responseReg = new SendSmsResponse();
 		ResteasyClient client = new ResteasyClientBuilder().build();
-		ResteasyWebTarget target = client.target(endPoint);
-		request.setApiKey(apiKey);
+		ResteasyWebTarget target = client.target(endPoint);  
+		request.setService(service);
 		Response response = target.request().post(Entity.entity(request, "application/json"));
 		String jsonValue = response.readEntity(String.class);
 		Gson gson = new Gson();

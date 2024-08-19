@@ -2,6 +2,8 @@ package mz.org.fgh.vmmc.controller;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
@@ -9,7 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mz.org.fgh.vmmc.commons.LocationType;
-import mz.org.fgh.vmmc.inout.UssdRequest;
+import mz.org.fgh.vmmc.inout.UssdIn;
+import mz.org.fgh.vmmc.inout.UssdOut;
 import mz.org.fgh.vmmc.menu.MenuHandler;
 import mz.org.fgh.vmmc.menu.MenuHandlerType;
 import mz.org.fgh.vmmc.model.CurrentState;
@@ -42,31 +45,40 @@ public class VmmcService {
 	@Autowired
 	SmsConfigurationService smsConfigurationService;
 
-	public String invokeVmmcUssdService(String sessionId, String serviceCode, String phoneNumber, String text)
-			throws Throwable {
-		UssdRequest ussdRequest = new UssdRequest(sessionId, serviceCode, phoneNumber,
-				MessageUtils.formatInputText(text));
+	public UssdOut invokeVmmcUssdService(String sessionId, String transactionId, String from, String to, String content,
+			String action) throws Throwable {
 		long sessionRecoverTime = getSessionRecoverTime();
+		OffsetDateTime now = OffsetDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+		String formattedDate = now.format(formatter);
 
-		CurrentState currentState = menuService.findCurrentStateByPhoneNumber(phoneNumber, true);
+		CurrentState currentState = menuService.findCurrentStateByPhoneNumber(to, true);
+		UssdIn ussdIn = new UssdIn(MessageUtils.formatInputText(content), from, to, sessionId, transactionId, action,
+				formattedDate);
 
-		if (currentState == null) {
-			return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdRequest, currentState,
-					menuService, operationMetadataService, sessionDataService, infoMessageService,
-					smsConfigurationService);
+		UssdOut out = new UssdOut();
+		if (ussdIn.getAction().equalsIgnoreCase("false") || currentState == null) {
+
+			out = menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdIn, currentState, menuService,
+					operationMetadataService, sessionDataService, infoMessageService, smsConfigurationService);
+
+			return out;
 		}
 
 		long seconds = Duration.between(currentState.getCreatedDate(), LocalDateTime.now()).getSeconds();
-		if (isSessionExpired(ussdRequest, sessionRecoverTime, currentState, seconds)) {
-			return handleExpiredSession(ussdRequest, currentState, operationMetadataService);
+		if (isSessionExpired(ussdIn, sessionRecoverTime, currentState, seconds)) {
+			out = handleExpiredSession(ussdIn, currentState, operationMetadataService);
 		} else {
-			return handleCurrentState(ussdRequest, currentState);
+			out = handleCurrentState(ussdIn, currentState);
 		}
+
+		return out;
 	}
 
-	private String handleCurrentState(UssdRequest ussdRequest, CurrentState currentState) throws Throwable {
-		if (currentState.getLocation().equalsIgnoreCase(LocationType.MENU_PRINCIPAL.getCode())) {
-			switch (ussdRequest.getText()) {
+	private UssdOut handleCurrentState(UssdIn ussdIn, CurrentState currentState) throws Throwable {
+		UssdOut out = new UssdOut(ussdIn);
+		if (currentState.getLocation().equalsIgnoreCase(LocationType.MENU_PRINCIPAL.getCode())) { 
+			switch (ussdIn.getContent()) {
 			case "1":
 			case "3":
 			case "4":
@@ -79,30 +91,39 @@ public class VmmcService {
 				currentState.setLocation(LocationType.MENU_PRINCIPAL.getCode());
 				break;
 			default:
-				return ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR;
+				out.setContent(ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR);
+				out.setAction("End");
+				return out;
 			}
-			return menuTypes.get(currentState.getLocation()).handleMenu(ussdRequest, currentState, menuService,
+			return menuTypes.get(currentState.getLocation()).handleMenu(ussdIn, currentState, menuService,
 					operationMetadataService, sessionDataService, infoMessageService, smsConfigurationService);
 		} else {
-			return menuTypes.get(currentState.getLocation()).handleMenu(ussdRequest, currentState, menuService,
+
+			return menuTypes.get(currentState.getLocation()).handleMenu(ussdIn, currentState, menuService,
 					operationMetadataService, sessionDataService, infoMessageService, smsConfigurationService);
 		}
 	}
 
-	private String handleExpiredSession(UssdRequest ussdRequest, CurrentState currentState,
+	private UssdOut handleExpiredSession(UssdIn ussdIn, CurrentState currentState,
 			OperationMetadataService operationMetadataService) throws Throwable {
-		switch (ussdRequest.getText()) {
+		UssdOut out = new UssdOut(ussdIn);
+
+		switch (ussdIn.getContent()) {
 		case "":
-			return ConstantUtils.MENU_SESSION_RECOVER_DESCRIPTION;
+			out.setContent(ConstantUtils.MENU_SESSION_RECOVER_DESCRIPTION);
+			out.setAction("true");
+			return out;
 		case "1":
-			return menuTypes.get(currentState.getLocation()).recoverSession(ussdRequest, currentState, menuService,
+			return menuTypes.get(currentState.getLocation()).recoverSession(ussdIn, currentState, menuService,
 					sessionDataService, operationMetadataService);
 		case "2":
-			return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdRequest, currentState,
-					menuService, operationMetadataService, sessionDataService, infoMessageService,
-					smsConfigurationService);
+			return menuTypes.get(LocationType.MENU_PRINCIPAL.getCode()).handleMenu(ussdIn, currentState, menuService,
+					operationMetadataService, sessionDataService, infoMessageService, smsConfigurationService);
 		default:
-			return ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR;
+
+			out.setContent(ConstantUtils.MESSAGE_OPCAO_INVALIDA_TERMINAR);
+			out.setAction("end");
+			return out;
 		}
 	}
 
@@ -110,9 +131,8 @@ public class VmmcService {
 		return Long.parseLong(System.getProperty("sessionRecoverTime", "30"));
 	}
 
-	private boolean isSessionExpired(UssdRequest ussdRequest, long sessionRecoverTime, CurrentState currentState,
-			long seconds) {
-		return !currentState.getSessionId().equalsIgnoreCase(ussdRequest.getSessionId()) && seconds > sessionRecoverTime
+	private boolean isSessionExpired(UssdIn ussdIn, long sessionRecoverTime, CurrentState currentState, long seconds) {
+		return !currentState.getSessionId().equalsIgnoreCase(ussdIn.getSession()) && seconds > sessionRecoverTime
 				&& !currentState.getLocation().equalsIgnoreCase(LocationType.MENU_PRINCIPAL.getCode());
 	}
 

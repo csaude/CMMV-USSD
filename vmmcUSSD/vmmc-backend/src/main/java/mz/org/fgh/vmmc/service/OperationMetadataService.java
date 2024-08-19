@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import mz.org.fgh.vmmc.commons.AppointmentStatus;
 import mz.org.fgh.vmmc.commons.RegisterStatus;
 import mz.org.fgh.vmmc.inout.AppointmentRequest;
-import mz.org.fgh.vmmc.inout.UssdRequest;
+import mz.org.fgh.vmmc.inout.UssdIn;
 import mz.org.fgh.vmmc.inout.UtenteRegisterRequest;
 import mz.org.fgh.vmmc.model.Address;
 import mz.org.fgh.vmmc.model.Appointment;
@@ -60,7 +60,7 @@ public class OperationMetadataService {
 	     return map;
        }
 
-       public UtenteRegisterRequest createUtenteByMetadatas(UssdRequest ussdRequest, String operationType, CurrentState currentState) {
+       public UtenteRegisterRequest createUtenteByMetadatas(UssdIn ussdIn, String operationType, CurrentState currentState) {
 
 	     Map<String, OperationMetadata> metadatas = getMetadatasByOperationTypeAndSessionId(currentState.getId(), operationType);
 	     int year = LocalDate.now().getYear() - Integer.parseInt(metadatas.get("age").getAttrValue());
@@ -87,7 +87,7 @@ public class OperationMetadataService {
 	     addresses[0] = address;
 
 	     request.setAddresses(addresses);
-	     request.setCellNumber(metadatas.get("cellNumber") == null ? StringUtils.remove(ussdRequest.getPhoneNumber(), "+258")
+	     request.setCellNumber(metadatas.get("cellNumber") == null ? StringUtils.remove(ussdIn.getTo(), "+258")
 			 : StringUtils.remove(metadatas.get("cellNumber").getAttrValue(), "+258"));
 	     request.setWhatsappNumber(request.getCellNumber());
 	   //  request.setHaspartner(metadatas.get("hasPartner").getAttrValue().equals("1") ? true : false);
@@ -122,7 +122,7 @@ public class OperationMetadataService {
 
        }
 
-       public AppointmentRequest createAppointmentRequestByMetadatas(UssdRequest ussdRequest, String operationType, CurrentState currentState, Menu menu) {
+       public AppointmentRequest createAppointmentRequestByMetadatas(UssdIn ussdIn, String operationType, CurrentState currentState, Menu menu) {
 
 	     Map<String, OperationMetadata> metadatas = getMetadatasByOperationTypeAndSessionId(currentState.getId(), operationType);
 
@@ -151,7 +151,7 @@ public class OperationMetadataService {
        }
 
        
-       public AppointmentRequest createAppointmentRequestByMetadatasOnRegistration(UssdRequest ussdRequest, String operationType, CurrentState currentState) {
+       public AppointmentRequest createAppointmentRequestByMetadatasOnRegistration(UssdIn ussdIn, String operationType, CurrentState currentState) {
 
   	     Map<String, OperationMetadata> metadatas = getMetadatasByOperationTypeAndSessionId(currentState.getId(), operationType);
 

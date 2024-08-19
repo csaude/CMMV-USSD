@@ -1,23 +1,32 @@
 package mz.org.fgh.vmmc.inout;
 
 public class SendSmsRequest {
-       private String apiKey;
-       private PayloadSms payload;
+	private String service;
+	private String destination;
+	private String text;
 
-       public String getApiKey() {
-	     return apiKey;
-       }
+	public String getService() {
+		return service;
+	}
 
-       public void setApiKey(String apiKey) {
-	     this.apiKey = apiKey;
-       }
+	public void setService(String service) {
+		this.service = service;
+	}
 
-       public PayloadSms getPayload() {
-	     return payload;
-       }
+	public String getDestination() {
+		return destination;
+	}
 
-       public void setPayload(PayloadSms payload) {
-	     this.payload = payload;
-       }
+	public void setDestination(String destination) {
+		this.destination = destination;
+	}
+
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+	}
 
 }
