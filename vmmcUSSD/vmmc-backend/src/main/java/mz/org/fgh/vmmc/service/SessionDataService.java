@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mz.org.fgh.vmmc.inout.UtenteSearchResponse;
-import mz.org.fgh.vmmc.model.Address;
 import mz.org.fgh.vmmc.model.Clinic;
 import mz.org.fgh.vmmc.model.SessionData;
 import mz.org.fgh.vmmc.repository.SessionDataRepository;

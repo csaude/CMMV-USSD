@@ -29,21 +29,23 @@ public class MainMenuHandler implements MenuHandler {
 	public UssdOut handleMenu(UssdIn ussdIn, CurrentState currentState, MenuService menuService,
 			OperationMetadataService operationMetadataService, SessionDataService sessionDataService,
 			InfoMessageService infoMessageService, SmsConfigurationService smsConfigurationService) {
-
-		if (currentState == null || ussdIn.getAction().equalsIgnoreCase("false")) {
+		if (currentState !=null) {
+			//actualiza 
+			currentState.setActive(false);
+			menuService.saveCurrentState(currentState);
+			
 			currentState = new CurrentState(ussdIn.getSession(), 1, true, LocationType.MENU_PRINCIPAL.getCode(),
-					ussdIn.getTo(), LocalDateTime.now());
+					ussdIn.getFrom(), LocalDateTime.now());
 			long stateId = menuService.saveCurrentState(currentState);
 			currentState.setId(stateId);
+			
 		} else {
-			currentState.setActive(true);
-			currentState.setIdMenu(1);
-			currentState.setLocation(LocationType.MENU_PRINCIPAL.getCode());
-			currentState.setSessionId(ussdIn.getSession());
-			currentState.setPhoneNumber(ussdIn.getTo());
-			menuService.saveCurrentState(currentState);
-
+			currentState = new CurrentState(ussdIn.getSession(), 1, true, LocationType.MENU_PRINCIPAL.getCode(),
+					ussdIn.getFrom(), LocalDateTime.now());
+			long stateId = menuService.saveCurrentState(currentState);
+			currentState.setId(stateId);
 		}
+	 
 		Menu currentMenu = menuService.getCurrentMenuBySessionId(ussdIn.getSession(), true); 
 		return getNextMenuText(ussdIn, currentState, currentMenu, menuService);
 

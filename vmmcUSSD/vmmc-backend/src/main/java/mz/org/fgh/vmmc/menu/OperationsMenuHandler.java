@@ -17,7 +17,6 @@ import mz.org.fgh.vmmc.commons.LocationType;
 import mz.org.fgh.vmmc.inout.AppointmentRequest;
 import mz.org.fgh.vmmc.inout.AppointmentResponse;
 import mz.org.fgh.vmmc.inout.AppointmentSearchResponse;
-import mz.org.fgh.vmmc.inout.RecipientSms;
 import mz.org.fgh.vmmc.inout.SendSmsRequest;
 import mz.org.fgh.vmmc.inout.UssdIn;
 import mz.org.fgh.vmmc.inout.UssdOut;
@@ -143,7 +142,7 @@ public class OperationsMenuHandler implements MenuHandler {
 					menuService.saveCurrentState(currentState);
 
 					SendSmsRequest smsRequest = new SendSmsRequest();
-					smsRequest.setDestination(ussdIn.getTo());
+					smsRequest.setDestination(ussdIn.getFrom());
 					smsRequest.setText(getClinicsForSms(clinics));
 					RestClient.getInstance().sendSms(smsRequest, configsSms);
 
@@ -314,7 +313,7 @@ public class OperationsMenuHandler implements MenuHandler {
 			if (!menu.isPresent()) {
 				out.setContent(MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA,
 						StringUtils.remove(MessageUtils.getMenuText(currentMenu), "CON ")));
-				out.setAction("true");
+				out.setAction("request");
 				return out;
 
 			}
@@ -368,24 +367,22 @@ public class OperationsMenuHandler implements MenuHandler {
 
 			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CONFIRMATION_SMS_CLINICS_LIST_CODE)) {
 
-				nextMenu.setDescription(MessageFormat.format(nextMenu.getDescription(), ussdIn.getTo()));
+				nextMenu.setDescription(MessageFormat.format(nextMenu.getDescription(), ussdIn.getFrom()));
 			} else if (!ConstantUtils.OPTION_VOLTAR.equalsIgnoreCase(ussdIn.getContent())
 					&& ConstantUtils.MENU_INFORMATIVE_MESSAGES.equalsIgnoreCase(currentMenu.getCode())) {
 
 				Map<String, SmsConfiguration> configsSms = smsConfigurationService
-						.findSmsConfigurationByCode("FRONTLINE_SMS_CONFIG");
+						.findSmsConfigurationByCode("SMS_GATEWAY_CONFIG");
 
 				List<InfoMessage> listMessage = infoMessageService.findMessagesByCode(menu.get().getCode());
-				for (InfoMessage message : listMessage) {
-					RecipientSms[] recipients = new RecipientSms[1];
-					recipients[0] = new RecipientSms(ConstantUtils.TYPE_RECIEPIENT_MOBILE, ussdIn.getTo());
+				for (InfoMessage message : listMessage) {				 
 					SendSmsRequest smsRequest = new SendSmsRequest();
-					smsRequest.setDestination(ussdIn.getTo());
+					smsRequest.setDestination(ussdIn.getFrom());
 					smsRequest.setText(message.getDescription());
 					RestClient.getInstance().sendSms(smsRequest, configsSms);
 				}
 				MenuUtils.resetSession(currentState, menuService);
-				out.setContent(MessageFormat.format(ConstantUtils.MESSAGE_INFORMATIVE_MESSAGES, ussdIn.getTo()));
+				out.setContent(MessageFormat.format(ConstantUtils.MESSAGE_INFORMATIVE_MESSAGES, ussdIn.getFrom()));
 				out.setAction("end");
 				return out;
 
@@ -433,7 +430,7 @@ public class OperationsMenuHandler implements MenuHandler {
 
 			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CONFIRMATION_SMS_CLINICS_LIST_CODE)) {
 
-				nextMenu.setDescription(MessageFormat.format(nextMenu.getDescription(), ussdIn.getTo()));
+				nextMenu.setDescription(MessageFormat.format(nextMenu.getDescription(), ussdIn.getFrom()));
 
 			}
 
@@ -556,7 +553,7 @@ public class OperationsMenuHandler implements MenuHandler {
 
 		if (ussdIn.getContent().equalsIgnoreCase(ConstantUtils.OPTION_VER_MAIS)) {
 			out.setContent(getDistrictsMenu(selectedProvinceId, allProvinces, ussdIn, currentMenu));
-			out.setAction("true");
+			out.setAction("request");
 			return out;
 
 		} else if (mapDistricts.containsKey(ussdIn.getContent())) {
@@ -571,7 +568,7 @@ public class OperationsMenuHandler implements MenuHandler {
 		} else {
 			out.setContent(MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA, StringUtils
 					.remove(getDistrictsMenu(selectedProvinceId, allProvinces, ussdIn, currentMenu), "CON ")));
-			out.setAction("true");
+			out.setAction("request");
 			return out;
 		}
 		return navegate(currentMenu, ussdIn, currentState, menuService, operationMetadataService, sessionDataService,
@@ -598,7 +595,7 @@ public class OperationsMenuHandler implements MenuHandler {
 		} else {
 			out.setContent(MessageFormat.format(ConstantUtils.MESSAGE_OPCAO_INVALIDA, StringUtils
 					.remove(MessageFormat.format(MessageUtils.getMenuText(currentMenu), getProvincesMenu()), "CON ")));
-			out.setAction("true");
+			out.setAction("request");
 			return out;
 
 		}
@@ -654,7 +651,7 @@ public class OperationsMenuHandler implements MenuHandler {
 			SessionDataService sessionDataService) {
 		// Invocar o servico de autenticacao
 		UtenteSearchResponse response = RestClient.getInstance().getUtenteBySystemNumber(ussdIn.getContent());
-		String phoneNumber = StringUtils.trim(StringUtils.remove(ussdIn.getTo(), "+258"));
+		String phoneNumber = StringUtils.trim(StringUtils.remove(ussdIn.getFrom(), "+258"));
 		UssdOut out = new UssdOut(ussdIn);
 
 		if (response.getStatusCode() == 200 && phoneNumber.equalsIgnoreCase(response.getCellNumber())) {
@@ -670,6 +667,7 @@ public class OperationsMenuHandler implements MenuHandler {
 		} else {
 			out.setContent(MessageFormat.format(ConstantUtils.MESSAGE_LOGIN_FAILED,
 					StringUtils.remove(MessageUtils.getMenuText(currentMenu), "CON ")));
+			out.setAction("request");
 			return out;
 		}
 	}
@@ -691,7 +689,7 @@ public class OperationsMenuHandler implements MenuHandler {
 		allProvinces = RestClient.getInstance().getAllProvinces();
 		int key = 1;
 		for (Province province : allProvinces) {
-			provinces += key + ". " + province.getDescription() + "\n";
+			provinces += key + ". " + MessageUtils.removeAccent(province.getDescription()) + "\r\n";
 			mapProvinces.put(String.valueOf(key), province);
 			key++;
 		}
@@ -741,7 +739,7 @@ public class OperationsMenuHandler implements MenuHandler {
 		String menuDistricts = StringUtils.EMPTY;
 
 		for (District item : list) {
-			menuDistricts += item.getOption() + ". " + item.getDescription() + "\n";
+			menuDistricts += item.getOption() + ". " + MessageUtils.removeAccent(item.getDescription()) + "\r\n";
 			mapDistricts.put(String.valueOf(item.getOption()), item);
 		}
 
@@ -787,7 +785,7 @@ public class OperationsMenuHandler implements MenuHandler {
 		String menuClinics = StringUtils.EMPTY;
 
 		for (Clinic item : list) {
-			menuClinics += item.getOption() + ". " + item.getName() + "\n";
+			menuClinics += item.getOption() + ". " + MessageUtils.removeAccent(item.getName()) + "\r\n";
 			mapClinics.put(String.valueOf(item.getOption()), item);
 		}
 
@@ -798,7 +796,7 @@ public class OperationsMenuHandler implements MenuHandler {
 		String menuClinics = StringUtils.EMPTY;
 		int i = 1;
 		for (Clinic item : list) {
-			menuClinics += i + "." + item.getName() + ",";
+			menuClinics += i + "." +MessageUtils.removeAccent( item.getName()) + ",";
 			i++;
 		}
 

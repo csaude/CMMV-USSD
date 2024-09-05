@@ -52,7 +52,7 @@ public class VmmcService {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
 		String formattedDate = now.format(formatter);
 
-		CurrentState currentState = menuService.findCurrentStateByPhoneNumber(to, true);
+		CurrentState currentState = menuService.findCurrentStateByPhoneNumber(from, true);
 		UssdIn ussdIn = new UssdIn(MessageUtils.formatInputText(content), from, to, sessionId, transactionId, action,
 				formattedDate);
 
@@ -111,7 +111,7 @@ public class VmmcService {
 		switch (ussdIn.getContent()) {
 		case "":
 			out.setContent(ConstantUtils.MENU_SESSION_RECOVER_DESCRIPTION);
-			out.setAction("true");
+			out.setAction("request");
 			return out;
 		case "1":
 			return menuTypes.get(currentState.getLocation()).recoverSession(ussdIn, currentState, menuService,

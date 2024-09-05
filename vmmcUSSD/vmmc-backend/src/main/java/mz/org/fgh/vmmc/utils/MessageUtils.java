@@ -27,9 +27,9 @@ public class MessageUtils {
 	     StringBuilder sb = new StringBuilder();
 
 	     if (menu != null) {
-		   sb.append(menu.getDescription()).append("\n");
+		   sb.append(menu.getDescription()).append("\r\n");
 		   for (Menu item : menu.getMenuItems()) {
-			 sb.append(item.getDescription()).append("\n");
+			 sb.append(item.getDescription()).append("\r\n");
 		   }
 	     } else {
 		   sb.append(ConstantUtils.MENU_PRINCIPAL_DESCRIPTION);

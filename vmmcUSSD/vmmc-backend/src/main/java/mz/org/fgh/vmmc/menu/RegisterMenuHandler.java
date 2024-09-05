@@ -14,8 +14,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import mz.org.fgh.vmmc.client.RestClient;
-import mz.org.fgh.vmmc.inout.RecipientSms;
-import mz.org.fgh.vmmc.inout.SendSmsRequest;
+import mz.org.fgh.vmmc.commons.LocationType;
 import mz.org.fgh.vmmc.inout.UssdIn;
 import mz.org.fgh.vmmc.inout.UssdOut;
 import mz.org.fgh.vmmc.inout.UtenteRegisterRequest;
@@ -27,7 +26,6 @@ import mz.org.fgh.vmmc.model.Menu;
 import mz.org.fgh.vmmc.model.OperationMetadata;
 import mz.org.fgh.vmmc.model.Province;
 import mz.org.fgh.vmmc.model.SessionData;
-import mz.org.fgh.vmmc.model.SmsConfiguration;
 import mz.org.fgh.vmmc.service.InfoMessageService;
 import mz.org.fgh.vmmc.service.MenuService;
 import mz.org.fgh.vmmc.service.OperationMetadataService;
@@ -65,7 +63,7 @@ public class RegisterMenuHandler implements MenuHandler {
 	public UssdOut handleMenu(UssdIn ussdIn, CurrentState currentState, MenuService menuService,
 			OperationMetadataService operationMetadataService, SessionDataService sessionDataService,
 			InfoMessageService infoMessageService, SmsConfigurationService smsConfigurationService) {
- 
+
 		Menu currentMenu = menuService.getCurrentMenuBySessionId(currentState.getSessionId(), true);
 		if (currentMenu != null) {
 			if (currentMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_REGISTER_CONFIRMATION_CODE)) {
@@ -177,10 +175,13 @@ public class RegisterMenuHandler implements MenuHandler {
 
 			}
 			currentState.setIdMenu(menu.get().getNextMenuId());
-			// actualiza o menu corrente
-			menuService.saveCurrentState(currentState);
 			// Pega o proximo menu
 			Menu nextMenu = menuService.findMenuById(menu.get().getNextMenuId());
+			if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PRINCIPAL_CODE)) {
+				currentState.setLocation(LocationType.MENU_PRINCIPAL.getCode());
+			}
+			// actualiza o menu corrente
+			menuService.saveCurrentState(currentState);
 
 			if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_PROVINCES_CODE)) {
 
@@ -201,7 +202,7 @@ public class RegisterMenuHandler implements MenuHandler {
 			}
 			if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_CELLNUMBER_FROM_SESSION_CODE)) {
 
-				nextMenu.setDescription(MessageFormat.format(nextMenu.getDescription(), ussdIn.getTo()));
+				nextMenu.setDescription(MessageFormat.format(nextMenu.getDescription(), ussdIn.getFrom()));
 			} else if (nextMenu.getCode().equalsIgnoreCase(ConstantUtils.MENU_APPOINTMENT_ON_REGISTRATION_MONTH)) {
 				out.setContent(
 						MessageFormat.format(MessageUtils.getMenuText(nextMenu), DateUtils.getAppointmentsMonth()));
@@ -325,7 +326,7 @@ public class RegisterMenuHandler implements MenuHandler {
 		allProvinces = RestClient.getInstance().getAllProvinces();
 		int key = 1;
 		for (Province province : allProvinces) {
-			provinces += key + ". " + province.getDescription() + "\n";
+			provinces += key + ". " + MessageUtils.removeAccent(province.getDescription()) + "\r\n";
 			mapProvinces.put(String.valueOf(key), province);
 			key++;
 		}
@@ -370,7 +371,7 @@ public class RegisterMenuHandler implements MenuHandler {
 		String menuDistricts = StringUtils.EMPTY;
 
 		for (District item : list) {
-			menuDistricts += item.getOption() + ". " + item.getDescription() + "\n";
+			menuDistricts += item.getOption() + ". " + MessageUtils.removeAccent(item.getDescription()) + "\r\n";
 			mapDistricts.put(String.valueOf(item.getOption()), item);
 		}
 
@@ -419,7 +420,7 @@ public class RegisterMenuHandler implements MenuHandler {
 		String menuClinics = StringUtils.EMPTY;
 
 		for (Clinic item : list) {
-			menuClinics += item.getOption() + ". " + item.getName() + "\n";
+			menuClinics += item.getOption() + ". " + MessageUtils.removeAccent(item.getName()) + "\r\n";
 			mapClinics.put(String.valueOf(item.getOption()), item);
 		}
 
@@ -455,36 +456,30 @@ public class RegisterMenuHandler implements MenuHandler {
 			return out;
 		} else {
 			MenuUtils.resetSession(currentState, menuService);
+			out.setContent(ConstantUtils.MENU_REGISTER_SUCCESS);
+			out.setAction("end");
 
-			try {
-				Map<String, SmsConfiguration> configsSms = smsConfigurationService
-						.findSmsConfigurationByCode("FRONTLINE_SMS_CONFIG");
-				String smsBody = MessageFormat.format(ConstantUtils.MESSAGE_REGISTER_PASSWORD_SMS,
-						response.getSystemNumber());
-				MenuUtils.resetSession(currentState, menuService);
-				RecipientSms[] recipients = new RecipientSms[1];
-				recipients[0] = new RecipientSms(ConstantUtils.TYPE_RECIEPIENT_MOBILE, ussdIn.getTo()); 
-				SendSmsRequest smsRequest = new SendSmsRequest();
-				smsRequest.setDestination( ussdIn.getTo());
-				smsRequest.setText(smsBody);
-				try {
-					RestClient.getInstance().sendSms(smsRequest, configsSms);
-				} catch (Exception e) {
-					LOG.error(
-							"[RegisterMenuHandler.handleMenu] Ocorreu um erro ao enviar SMS, apos o registo do utente: "
-									+ ussdIn.getTo(),
-							e);
-				}
-				out.setContent(ConstantUtils.MENU_REGISTER_SUCCESS);
-				out.setAction("end");
-				return out;
-			} catch (Exception e) { // nao onsguiu
-				// enviar o sms com a confirmacao de registo, entao mostra na tela return
-				out.setContent(
-						MessageFormat.format(ConstantUtils.MESSAGE_REGISTER_PASSWORD_SMS, response.getSystemNumber()));
-				out.setAction("end");
-
-			}
+			/*
+			 * try { Map<String, SmsConfiguration> configsSms = smsConfigurationService
+			 * .findSmsConfigurationByCode("SMS_GATEWAY_CONFIG"); String smsBody =
+			 * MessageFormat.format(ConstantUtils.MESSAGE_REGISTER_PASSWORD_SMS,
+			 * response.getSystemNumber()); MenuUtils.resetSession(currentState,
+			 * menuService);
+			 * 
+			 * SendSmsRequest smsRequest = new SendSmsRequest(); smsRequest.setDestination(
+			 * ussdIn.getFrom()); smsRequest.setText(smsBody); try {
+			 * RestClient.getInstance().sendSms(smsRequest, configsSms); } catch (Exception
+			 * e) { LOG.error(
+			 * "[RegisterMenuHandler.handleMenu] Ocorreu um erro ao enviar SMS, apos o registo do utente: "
+			 * + ussdIn.getFrom(), e); }
+			 * out.setContent(ConstantUtils.MENU_REGISTER_SUCCESS); out.setAction("end");
+			 * return out; } catch (Exception e) { // nao onsguiu // enviar o sms com a
+			 * confirmacao de registo, entao mostra na tela return out.setContent(
+			 * MessageFormat.format(ConstantUtils.MESSAGE_REGISTER_PASSWORD_SMS,
+			 * response.getSystemNumber())); out.setAction("end");
+			 * 
+			 * }
+			 */
 			return out;
 		}
 	}

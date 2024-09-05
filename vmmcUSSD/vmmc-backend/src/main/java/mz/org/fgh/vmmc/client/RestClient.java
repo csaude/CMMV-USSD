@@ -73,7 +73,7 @@ public class RestClient {
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 		headers.put("X-Auth-Token", Arrays.asList(token));
 		HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
-		ResponseEntity<Province[]> result = restTemplate.exchange(ENDPOINT.concat("province"), HttpMethod.GET, entity,
+		ResponseEntity<Province[]> result = restTemplate.exchange(ENDPOINT.concat("province?offset=0&max=20"), HttpMethod.GET, entity,
 				Province[].class);
 		ObjectMapper mapper = new ObjectMapper();
 		Object objects = result.getBody();
