@@ -159,10 +159,11 @@ public class RestClient {
        }
 
        public AppointmentSearchResponse getAppointmentByUtenteId(String utenteId) {
+	     String token = RestClient.getInstance().login();
 	     AppointmentSearchResponse responseAppointment = new AppointmentSearchResponse();
 	     ResteasyClient client = new ResteasyClientBuilder().build();
 	     ResteasyWebTarget target = client.target(ENDPOINT.concat("appointment/search")).path(utenteId);
-	     Response response = target.request().get();
+	     Response response = target.request().header("X-Auth-Token", token).get();
 	     String jsonValue = response.readEntity(String.class);
 	     if (response.getStatus() != Response.Status.OK.getStatusCode() && response.getStatus() != Response.Status.CREATED.getStatusCode()) {
 		   LOG.error("[RestClient.getAppointmentByUtenteIdO] response: " + jsonValue);
