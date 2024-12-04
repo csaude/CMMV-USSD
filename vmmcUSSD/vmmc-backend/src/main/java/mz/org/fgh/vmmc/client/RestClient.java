@@ -182,7 +182,7 @@ public class RestClient {
 		response.close();
 		return responseAppointment;
 	}
-
+	
 	public SendSmsResponse sendSms(SendSmsRequest request, Map<String, SmsConfiguration> configsSms) {
 		String service = configsSms.get("SERVICE").getAttrValue();
 		String endPoint = configsSms.get("ENDPOINT").getAttrValue();
@@ -193,9 +193,10 @@ public class RestClient {
 		Response response = target.request().post(Entity.entity(request, "application/json"));
 		String jsonValue = response.readEntity(String.class);
 		Gson gson = new Gson();
+		
 		responseReg = gson.fromJson(jsonValue, SendSmsResponse.class);
 		response.close();
-		return responseReg;
+		return responseReg; 
 	}
 
 }
